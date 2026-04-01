@@ -1,5 +1,5 @@
 # Locales Pro
-#Aplikasi Locales merupakan sebuah software Point of Sale (POS) yang dirancang untuk membantu proses pengelolaan transaksi penjualan dan manajemen data barang secara efisien. Aplikasi ini bersifat multi-user, dengan dua peran utama yaitu Admin dan Kasir, di mana masing-masing memiliki hak akses dan fungsi yang berbeda sesuai kebutuhan operasional.
+Aplikasi Locales merupakan sebuah software Point of Sale (POS) yang dirancang untuk membantu proses pengelolaan transaksi penjualan dan manajemen data barang secara efisien. Aplikasi ini bersifat multi-user, dengan dua peran utama yaitu Admin dan Kasir, di mana masing-masing memiliki hak akses dan fungsi yang berbeda sesuai kebutuhan operasional.
 
 Pada sisi Admin, aplikasi menyediakan fitur yang lebih lengkap untuk kebutuhan manajemen dan monitoring. Admin dapat mengelola data barang seperti menambah, mengedit, dan menghapus barang, serta melakukan penambahan stok. Selain itu, Admin juga memiliki akses ke dashboard yang menampilkan informasi penting seperti monitoring data penjualan, kondisi stok barang, serta ringkasan (summary) transaksi harian maupun bulanan. Fitur ini membantu dalam pengambilan keputusan dan evaluasi bisnis secara lebih terstruktur.
 
