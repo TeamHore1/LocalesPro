@@ -6,3 +6,5 @@ Pada sisi Admin, aplikasi menyediakan fitur yang lebih lengkap untuk kebutuhan m
 Sementara itu, Kasir memiliki akses yang lebih terbatas dan difokuskan pada operasional transaksi. Kasir hanya dapat melakukan proses transaksi penjualan dan mencetak resi/struk pembayaran. Pembatasan ini bertujuan untuk menjaga keamanan data serta memastikan alur kerja tetap terorganisir.
 
 Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi kerja, meminimalisir kesalahan, serta memberikan kontrol yang lebih baik terhadap operasional penjualan dan manajemen inventaris.
+
+# License
