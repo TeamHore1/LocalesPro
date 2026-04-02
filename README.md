@@ -12,4 +12,4 @@ Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi
 # 👨‍💻 Instalasi
 
 # 📖 License
-abcdefg
+hak paten di miliki oleh ilham
