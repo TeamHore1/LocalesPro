@@ -7,7 +7,35 @@ Sementara itu, Kasir memiliki akses yang lebih terbatas dan difokuskan pada oper
 
 Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi kerja, meminimalisir kesalahan, serta memberikan kontrol yang lebih baik terhadap operasional penjualan dan manajemen inventaris.
 
-# 🚜 Tech Stack
+## 🚀 Fitur Utama
+- Login multi user (Admin & Kasir)
+- Manajemen data barang (CRUD)
+- Manajemen akun kasir
+- Transaksi penjualan
+- Perhitungan otomatis total & kembalian
+- Cetak struk
+
+## 🧑‍💻 Role User
+### Admin
+- Kelola barang
+- Kelola kasir
+- Monitoring transaksi
+- laporan 
+
+### Kasir
+- Input transaksi
+- Proses pembayaran
+- Cetak struk
+
+## 🛠️ Teknologi
+- Frontend: React JS, HTML, CSS, JavaScript
+- Backend: PHP
+- Database: MySQL
+- Server: XAMPP
+
+
+## 📌 Status
+On Development 🚧
 
 # 👨‍💻 Instalasi
 
