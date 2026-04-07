@@ -1,0 +1,208 @@
+/* Container Utama */
+.report-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+}
+
+.header-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-page h2 {
+  color: #092379;
+  margin: 0;
+}
+
+/* Bagian Tombol Aksi */
+.report-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-export,
+.btn-print {
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: 1.5px solid #092379;
+  background: white;
+  color: #092379;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-export:hover,
+.btn-print:hover {
+  background: #092379;
+  color: white;
+}
+
+/* --- TAMBAHAN: Summary Cards (Ringkasan Pendapatan) --- */
+.report-summary {
+  display: flex;
+  gap: 20px;
+}
+
+.summary-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  flex: 1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-bottom: 4px solid #f4f7fe;
+}
+
+.summary-card.main {
+  background: #092379;
+  color: white;
+  border-bottom: 4px solid #d6b22f; /* Aksen Kuning */
+}
+
+.summary-card span {
+  font-size: 13px;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.summary-card h3 {
+  font-size: 26px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.summary-card.main h3 {
+  color: #d6b22f;
+}
+
+/* --- Filter Section --- */
+.filter-card {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-end; /* Supaya label dan input sejajar bawah */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #092379;
+}
+
+.filter-input {
+  padding: 10px;
+  border: 2px solid #f4f7fe;
+  border-radius: 8px;
+  outline: none;
+  color: #092379;
+  font-weight: 600;
+}
+
+.filter-input:focus {
+  border-color: #d6b22f;
+}
+
+.btn-reset {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-reset:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* --- Tabel Section --- */
+.table-card {
+  background: white;
+  border-radius: 15px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  text-align: left;
+  padding: 15px;
+  background: #fcfdfe;
+  color: #092379;
+  border-bottom: 2px solid #f4f7fe;
+}
+
+.custom-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f8f9fa;
+  font-size: 14px;
+}
+
+.text-bold {
+  font-weight: 700;
+  color: #092379;
+}
+
+/* Badge Status & Method */
+.badge-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.method-tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.method-tag.cash,
+.method-tag.tunai {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.method-tag.qris {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+/* Print Mode: Supaya pas di print hasilnya bersih */
+@media print {
+  .sidebar,
+  .report-actions,
+  .filter-card,
+  .btn-reset {
+    display: none !important;
+  }
+  .report-container {
+    padding: 0;
+  }
+}

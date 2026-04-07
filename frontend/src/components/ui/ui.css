@@ -1,0 +1,85 @@
+/* Container untuk label & input */
+.input-group-custom {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #092379; /* Biru Locales */
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.input-field {
+  padding: 10px 14px;
+  border: 2px solid #f4f7fe;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #092379;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(9, 35, 121, 0.05);
+}
+
+/* Tombol Custom */
+.btn-custom {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-custom:active {
+  transform: scale(0.96);
+}
+
+/* Warna Tombol */
+.btn-primary {
+  background: #092379;
+  color: white;
+}
+.btn-primary:hover {
+  background: #061a5c;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #092379;
+  color: #092379;
+}
+.btn-outline:hover {
+  background: #f4f7fe;
+}
+
+/* Tambahan untuk select manual jika ingin diseragamkan */
+select.input-field {
+  cursor: pointer;
+  appearance: none; /* Menghilangkan arrow bawaan beberapa browser */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23092379' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 40px;
+}

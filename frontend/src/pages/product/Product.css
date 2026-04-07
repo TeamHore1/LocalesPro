@@ -1,0 +1,249 @@
+/* src/pages/product/Product.css */
+.product-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-add-product {
+  background-color: #092379;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-add-product:hover {
+  background-color: #d6b22f;
+  color: #092379;
+}
+
+/* --- TABLE SECTION --- */
+.table-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  text-align: left;
+  padding: 15px;
+  border-bottom: 2px solid #f4f7fe;
+  color: #092379;
+  font-size: 14px;
+}
+
+.custom-table td {
+  padding: 15px;
+  border-bottom: 1px solid #f4f7fe;
+  vertical-align: middle;
+}
+
+.product-img-table {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.recipe-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.tag-ing {
+  background: #f0f2f5;
+  color: #555;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  border: 1px solid #e0e0e0;
+}
+
+/* --- MODAL SECTION (SINGLE COLUMN) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 500px; /* Kembali ke lebar semula */
+  max-width: 95%;
+  max-height: 90vh; /* Agar bisa scroll kalau kepanjangan */
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #999;
+}
+
+/* Form Styles */
+.modal-form .form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.modal-form label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #092379;
+}
+
+.modal-form input,
+.modal-form select {
+  padding: 10px;
+  border: 2px solid #f4f7fe;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+}
+
+.modal-form input:focus {
+  border-color: #d6b22f;
+}
+
+/* ATUR RESEP SECTION (KE BAWAH) */
+.recipe-section {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f9fbff;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e0;
+}
+
+.recipe-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.recipe-input-group select {
+  flex: 2;
+}
+.recipe-input-group input {
+  flex: 1;
+}
+
+.btn-add-ing {
+  background: #d6b22f;
+  color: #092379;
+  border: none;
+  width: 40px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.recipe-list {
+  background: white;
+  border-radius: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #edf2f7;
+}
+
+.recipe-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 13px;
+}
+
+.recipe-item button {
+  background: none;
+  border: none;
+  color: #e53e3e;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-save {
+  background: #092379;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
