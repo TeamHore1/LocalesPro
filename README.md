@@ -19,6 +19,7 @@ Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi
 ### Admin
 - Kelola barang
 - Kelola kasir
+- kelola cabang
 - Monitoring transaksi
 - laporan 
 
@@ -26,6 +27,7 @@ Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi
 - Input transaksi
 - Proses pembayaran
 - Cetak struk
+- Tambah Stock
 
 ## 🛠️ Teknologi
 - Frontend: React JS, HTML, CSS, JavaScript
@@ -35,9 +37,10 @@ Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi
 
 
 ## 📌 Status
-On Development 🚧
+On Development
 
 # 👨‍💻 Instalasi
+=
 
 # 📖 License
-hak paten di miliki oleh ilham
+Proyek LOCALESPRO-V1 di buat untuk tujuan ekperimental dan sarana pembelajaran desain Pengembangan Perangkat Lunak
