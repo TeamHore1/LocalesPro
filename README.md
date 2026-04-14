@@ -31,7 +31,7 @@ Dengan adanya pemisahan peran ini, aplikasi Locales mampu meningkatkan efisiensi
 
 ## 🛠️ Teknologi
 - Frontend: React JS, HTML, CSS, JavaScript
-- Backend: PHP
+- Backend: PHP Native
 - Database: MySQL
 - Server: XAMPP
 
