@@ -4,7 +4,7 @@ import { formatRupiah } from "../../utils/currency";
 import { useApp } from "../../store/AppContext";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import Modal from "../../components/ui/Modal"; // Import Modal Custom
+import Modal from "../../components/ui/Modal";
 
 const POS = () => {
   const { products, ingredients, processTransaction } = useApp();

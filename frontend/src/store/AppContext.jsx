@@ -67,14 +67,10 @@ export const AppProvider = ({ children }) => {
   }, [selectedBranch]);
 
   // --- 2. MANAJEMEN BAHAN BAKU (INGREDIENTS) ---
+  // PERBAIKAN: Mengembalikan fungsi addIngredient ke fungsi aslinya
   const addIngredient = async (data) => {
     try {
-      // Pastikan menyertakan branch_id agar data masuk ke cabang yang aktif
-      const payload = {
-        ...data,
-        branch_id: selectedBranch?.id || 1,
-      };
-      const res = await api.post("/ingredients/create.php", payload);
+      const res = await api.post("/ingredients/create.php", data);
       if (res.data.status === "success") await refreshData();
       return res.data;
     } catch (error) {
@@ -85,8 +81,6 @@ export const AppProvider = ({ children }) => {
 
   const updateIngredient = async (id, data) => {
     try {
-      // PHP akan menerima field 'stock' dan 'minStock' untuk diubah
-      // menjadi stock_quantity dan min_stock di database
       const res = await api.post("/ingredients/update.php", { id, ...data });
       if (res.data.status === "success") await refreshData();
       return res.data;
@@ -123,7 +117,7 @@ export const AppProvider = ({ children }) => {
   const deleteProduct = async (id) => {
     const res = await api.post("/products/delete.php", { id });
     if (res.data.status === "success") {
-      await refreshData(); // Ini akan memicu pengambilan ulang data yang statusnya 'active' saja
+      await refreshData();
       return res.data;
     } else {
       alert(res.data.message);
@@ -137,14 +131,13 @@ export const AppProvider = ({ children }) => {
       const target = ingredients.find((ing) => ing.id === id);
       if (!target) return;
 
-      // SINKRONISASI: Menggunakan stock_quantity dan min_stock sesuai kolom DB
       const currentStock = parseFloat(target.stock_quantity || 0);
 
       await updateIngredient(id, {
         name: target.name,
         unit: target.unit,
         branch_id: target.branch_id,
-        minStock: target.min_stock, // Menjaga nilai min_stock tetap ada saat update
+        minStock: target.min_stock,
         stock: currentStock + parseFloat(amount),
       });
     } catch (error) {
@@ -154,25 +147,38 @@ export const AppProvider = ({ children }) => {
 
   const processTransaction = async (cartItems, paymentMethod, totalAmount) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const userData = JSON.parse(localStorage.getItem("user"));
+
+      // Validasi data user sebelum kirim
+      if (!userData) {
+        return {
+          success: false,
+          message: "User tidak ditemukan. Silahkan login ulang.",
+        };
+      }
+
       const payload = {
-        user_id: user.id,
+        user_id: userData.id,
         branch_id: selectedBranch?.id || 1,
         total_price: totalAmount,
         payment_method: paymentMethod,
         items: cartItems.map((item) => ({
-          id: item.id,
-          qty: item.qty,
+          id: item.id, // ID Produk
+          qty: item.quantity || item.qty, // Support dua kemungkinan nama field
           price: item.price,
         })),
       };
+
       const res = await api.post("/transactions/create.php", payload);
+
       if (res.data.status === "success") {
+        // Penting: Refresh data agar stok terbaru ditarik dari DB
         await refreshData();
         return { success: true };
       }
       return { success: false, message: res.data.message };
     } catch (error) {
+      console.error("Gagal proses transaksi:", error);
       return { success: false, message: "Terjadi kesalahan server." };
     }
   };
