@@ -1,0 +1,203 @@
+.cashier-register-page {
+  min-height: 100vh;
+  padding: 32px 16px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cashier-register-card {
+  width: min(920px, 100%);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.cashier-register-brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.cashier-register-brand img {
+  width: 150px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.cashier-register-brand h1 {
+  margin: 0 0 8px;
+  color: #092379;
+  font-size: 30px;
+}
+
+.cashier-register-brand p {
+  margin: 0;
+  color: #52607d;
+  line-height: 1.6;
+}
+
+.cashier-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.register-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.register-grid label,
+.register-textarea-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #1f2a44;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.register-grid input,
+.register-grid select,
+.register-textarea-field textarea {
+  border: 2px solid #dfe7f4;
+  border-radius: 8px;
+  padding: 13px 14px;
+  font: inherit;
+  color: #1f2937;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-grid input:focus,
+.register-grid select:focus,
+.register-textarea-field textarea:focus {
+  outline: none;
+  border-color: #092379;
+  box-shadow: 0 0 0 4px rgba(9, 35, 121, 0.08);
+}
+
+.register-textarea-field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.register-security-box {
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff7d6, #fdf2b8);
+  color: #7a5a00;
+  padding: 16px 18px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.register-error {
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b42318;
+  padding: 14px 16px;
+  line-height: 1.5;
+}
+
+.cashier-register-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.register-primary-button,
+.register-secondary-button {
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.register-primary-button {
+  background: #092379;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(9, 35, 121, 0.18);
+}
+
+.register-secondary-button {
+  background: #eef2ff;
+  color: #092379;
+}
+
+.register-primary-button:hover,
+.register-secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.register-primary-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.register-login-link {
+  color: #092379;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-login-link:hover {
+  text-decoration: underline;
+}
+
+.cashier-register-success {
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f8fbff, #eef5ff);
+  padding: 28px;
+  border: 1px solid #d6e4ff;
+}
+
+.cashier-register-success h2 {
+  margin-top: 0;
+  color: #092379;
+}
+
+.cashier-register-success p {
+  color: #52607d;
+  line-height: 1.6;
+}
+
+.success-branch {
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .cashier-register-card {
+    padding: 24px 18px;
+  }
+
+  .cashier-register-brand {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .register-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-register-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .register-login-link {
+    text-align: center;
+  }
+}

@@ -1,0 +1,270 @@
+.branch-container {
+  padding: 10px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.header-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.branch-card {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  position: relative;
+  border: 2px solid #f4f7fe;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.branch-card:hover {
+  box-shadow: 0 15px 30px rgba(9, 35, 121, 0.1);
+}
+
+.branch-card.active {
+  border-color: #092379;
+  background: linear-gradient(to bottom, #ffffff, #f0f4ff);
+}
+
+.active-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: #d6b22f; /* Kuning Locales */
+  color: #092379;
+  padding: 5px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(214, 178, 47, 0.3);
+}
+
+.branch-icon {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f4f7fe;
+  color: #092379;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.branch-info h3 {
+  margin: 0 0 15px 0;
+  color: #092379;
+  font-size: 20px;
+}
+
+.info-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  align-items: flex-start;
+}
+
+.info-item span {
+  flex: 0 0 64px;
+  font-size: 12px;
+  color: #092379;
+  font-weight: 700;
+}
+
+.info-item p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.branch-footer {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+/* --- STYLING MODAL TAMBAH CABANG (BARU) --- */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(9, 35, 121, 0.4); /* Overlay biru transparan */
+  backdrop-filter: blur(4px); /* Efek blur modern */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.modal-header-form h3 {
+  margin: 0;
+  color: #092379;
+}
+
+.close-x {
+  background: #f4f7fe;
+  border: none;
+  font-size: 24px;
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #092379;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.close-x:hover {
+  background: #092379;
+  color: white;
+}
+
+.branch-form .input-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.branch-form label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.branch-form input,
+.branch-form textarea,
+.branch-form select {
+  padding: 12px 15px;
+  border: 2px solid #f4f7fe;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.branch-form input:focus,
+.branch-form textarea:focus,
+.branch-form select:focus {
+  outline: none;
+  border-color: #092379;
+  background: #f8faff;
+}
+
+.branch-form textarea {
+  resize: none;
+  height: 80px;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* --- ANIMASI --- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.branch-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.edit-branch-btn {
+  background: #f0f4ff;
+  border: 1px solid #d6b22f;
+  min-width: 35px;
+  min-height: 35px;
+  border-radius: 8px;
+  padding: 0 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  color: #092379;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.edit-branch-btn:hover {
+  background: #d6b22f;
+  color: white;
+}
+
+.delete-branch-btn {
+  background: #fff0f0;
+  border: 1px solid #fecaca;
+  min-width: 35px;
+  min-height: 35px;
+  border-radius: 8px;
+  padding: 0 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  color: #b42318;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.delete-branch-btn:hover {
+  background: #ff4d4d;
+  color: white;
+}
