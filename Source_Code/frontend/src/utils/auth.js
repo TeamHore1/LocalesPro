@@ -1,6 +1,13 @@
 const AUTH_STORAGE_KEY = "locales_auth_session";
 const LEGACY_TOKEN_KEY = "token";
 const LEGACY_USER_KEY = "user";
+export const AUTH_SESSION_EVENT = "locales_auth_session_changed";
+
+const notifyAuthSessionChange = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(AUTH_SESSION_EVENT));
+  }
+};
 
 const decodeJwtPayload = (token) => {
   try {
@@ -69,22 +76,26 @@ const readRawSession = () => {
   }
 };
 
-export const clearAuthSession = () => {
+export const clearAuthSession = ({ silent = false } = {}) => {
   localStorage.removeItem(AUTH_STORAGE_KEY);
   localStorage.removeItem(LEGACY_TOKEN_KEY);
   localStorage.removeItem(LEGACY_USER_KEY);
+
+  if (!silent) {
+    notifyAuthSessionChange();
+  }
 };
 
 export const getAuthSession = () => {
   const session = readRawSession();
 
   if (!session) {
-    clearAuthSession();
+    clearAuthSession({ silent: true });
     return null;
   }
 
   if (session.expiresAt * 1000 <= Date.now()) {
-    clearAuthSession();
+    clearAuthSession({ silent: true });
     return null;
   }
 
@@ -115,6 +126,7 @@ export const setAuthSession = ({ token, user, expiresAt, expiresIn }) => {
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
   localStorage.removeItem(LEGACY_TOKEN_KEY);
   localStorage.removeItem(LEGACY_USER_KEY);
+  notifyAuthSessionChange();
 
   return session;
 };

@@ -6,46 +6,67 @@
   justify-content: center;
   min-height: 100vh;
   padding: 24px;
+  position: relative;
+}
+
+.login-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9, 35, 121, 0.28), rgba(9, 35, 121, 0.05)),
+    rgba(255, 255, 255, 0.04);
+  pointer-events: none;
 }
 
 .h1-style img {
-  width: 200px;
-  height: 130px;
+  width: 178px;
+  height: 118px;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .container {
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  background:
+    linear-gradient(135deg, rgba(214, 178, 47, 0.06), transparent 45%),
+    #fff;
+  border-radius: 8px;
+  box-shadow: 0 28px 70px rgba(9, 35, 121, 0.24);
   position: relative;
   overflow: hidden;
-  width: 768px;
+  width: min(820px, 100%);
   max-width: 100%;
-  min-height: 520px;
+  min-height: 540px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  z-index: 1;
+}
+
+.mobile-mode-switch {
+  display: none;
 }
 
 .container button {
   background-color: #d6b22f;
-  color: #fff;
+  color: #092379;
   font-size: 12px;
-  padding: 10px 45px;
+  padding: 11px 22px;
   border: 1px solid transparent;
   border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 900;
+  letter-spacing: 0;
   text-transform: uppercase;
   margin-top: 10px;
   cursor: pointer;
   transition: 0.3s;
 }
 
-.container button.hidden {
+.container button.mode-switch-button {
   background-color: transparent;
   border-color: #fff;
+  color: #fff;
+  min-width: 170px;
 }
 
 .container form {
@@ -54,27 +75,65 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 10px;
-  padding: 0 40px;
+  gap: 11px;
+  padding: 0 44px;
   height: 100%;
 }
 
 .container h1 {
   font-size: 2rem;
   line-height: 1.1;
-  margin: 0 0 6px;
-  color: #111;
+  margin: 0;
+  color: #092379;
+  letter-spacing: 0;
+}
+
+.login-form-eyebrow {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #092379;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.login-form-copy {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .container input {
-  background-color: #eee;
-  border: none;
+  background-color: #ffffff;
+  border: 2px solid #e1e8f6;
   margin: 0;
   padding: 12px 14px;
   font-size: 13px;
   border-radius: 8px;
   width: 100%;
   outline: none;
+  color: #092379;
+  font-weight: 700;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.container input:focus {
+  border-color: #092379;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(9, 35, 121, 0.08);
+}
+
+.container input::placeholder {
+  color: #98a2b3;
 }
 
 .form-container {
@@ -128,7 +187,9 @@
 .toggle {
   background-color: #d6b22f;
   height: 100%;
-  background: linear-gradient(to right, #d6b22f, #d6b22f);
+  background:
+    linear-gradient(145deg, rgba(214, 178, 47, 0.96), rgba(214, 178, 47, 0.76)),
+    #d6b22f;
   color: #fff;
   position: relative;
   left: -100%;
@@ -159,10 +220,11 @@
 .toggle-panel h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #fff;
+  color: #ffffff;
+  font-weight: 800;
 }
 
-.toggle-panel .hidden {
+.toggle-panel .mode-switch-button {
   min-width: 160px;
 }
 
@@ -202,7 +264,7 @@
 }
 
 .password-field input {
-  padding-right: 108px;
+  padding-right: 52px;
 }
 
 .password-toggle {
@@ -211,13 +273,22 @@
   right: 8px;
   transform: translateY(-50%);
   margin-top: 0 !important;
-  padding: 8px 10px !important;
-  font-size: 11px !important;
+  width: 34px;
+  height: 30px;
+  min-width: 34px !important;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0 !important;
   letter-spacing: 0 !important;
+  color: #092379 !important;
 }
 
 .btn-login-action {
   width: 100%;
+  min-height: 44px;
+  box-shadow: 0 10px 22px rgba(214, 178, 47, 0.24);
 }
 
 .btn-login-action:disabled {
@@ -239,22 +310,52 @@
 
 @media (max-width: 768px) {
   .login-body {
-    padding: 16px;
+    padding: 48px 18px;
+    align-items: center;
+    min-height: 100svh;
   }
 
   .container {
-    min-height: 760px;
+    width: min(430px, 100%);
+    min-height: auto;
+    overflow: visible;
+    padding: 20px;
+  }
+
+  .mobile-mode-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid #dbe4ff;
+    border-radius: 8px;
+    background: #f4f7fe;
+    margin-bottom: 16px;
+  }
+
+  .mobile-mode-switch button {
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 12px;
+    background: transparent;
+    color: #52607d;
+    box-shadow: none;
+  }
+
+  .mobile-mode-switch button.active {
+    background: #092379;
+    color: #ffffff;
   }
 
   .form-container,
   .sign-in,
-  .sign-up,
-  .toggle-container {
+  .sign-up {
     width: 100%;
     position: relative;
     left: 0;
     transform: none !important;
     opacity: 1;
+    height: auto;
   }
 
   .sign-up {
@@ -270,32 +371,33 @@
   }
 
   .toggle-container {
-    height: auto;
-    border-radius: 0;
-    min-height: 220px;
-  }
-
-  .toggle,
-  .container.active .toggle {
-    left: 0;
-    width: 100%;
-    transform: none;
-  }
-
-  .toggle-panel {
-    position: relative;
-    width: 100%;
-    min-height: 220px;
-    transform: none !important;
-  }
-
-  .toggle-left {
     display: none;
   }
 
-  .container.active .toggle-left,
-  .toggle-right,
-  .container.active .toggle-right {
-    display: flex;
+  .container form {
+    padding: 20px 4px 4px;
+    min-height: auto;
+  }
+
+  .container h1 {
+    font-size: 1.65rem;
+  }
+
+  .login-form-copy {
+    font-size: 12px;
+  }
+
+  .login-register-link {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-body {
+    padding: 34px 14px;
+  }
+
+  .container {
+    padding: 16px;
   }
 }

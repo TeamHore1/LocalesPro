@@ -7,15 +7,16 @@
 
 .input-label {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #092379; /* Biru Locales */
   margin-bottom: 6px;
   text-align: left;
 }
 
 .input-field {
+  min-height: 42px;
   padding: 10px 14px;
-  border: 2px solid #f4f7fe;
+  border: 2px solid #e8eefc;
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s ease;
@@ -30,9 +31,10 @@
 
 /* Tombol Custom */
 .btn-custom {
-  padding: 10px 20px;
+  min-height: 42px;
+  padding: 10px 18px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 800;
   font-size: 14px;
   cursor: pointer;
   border: none;
@@ -41,6 +43,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .btn-custom:active {
@@ -51,26 +54,30 @@
 .btn-primary {
   background: #092379;
   color: white;
+  box-shadow: 0 10px 22px rgba(9, 35, 121, 0.16);
 }
 .btn-primary:hover {
   background: #061a5c;
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-  background: #e74c3c;
+  background: #eb5757;
   color: white;
 }
 .btn-danger:hover {
-  background: #c0392b;
+  background: #c73b3b;
+  transform: translateY(-1px);
 }
 
 .btn-outline {
-  background: transparent;
-  border: 2px solid #092379;
+  background: #ffffff;
+  border: 1px solid #d8e1ff;
   color: #092379;
 }
 .btn-outline:hover {
   background: #f4f7fe;
+  border-color: #092379;
 }
 
 /* Tambahan untuk select manual jika ingin diseragamkan */

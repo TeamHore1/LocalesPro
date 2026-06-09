@@ -2,6 +2,20 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 import { useApp } from "../../hooks/useApp";
 import Button from "../../components/ui/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import EmptyState from "../../components/ui/EmptyState";
+import { CardSkeletonGrid, Skeleton } from "../../components/ui/Skeleton";
+import {
+  AlertCircle,
+  Check,
+  ChevronDown,
+  ClipboardCheck,
+  Mail,
+  MapPin,
+  Phone,
+  Store,
+  UserRound,
+} from "lucide-react";
 import "./CashierAccounts.css";
 
 const FILTERS = [
@@ -35,6 +49,23 @@ const formatDateTime = (value) => {
   }).format(date);
 };
 
+const getInitials = (value) => {
+  const words = String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return "K";
+  }
+
+  return words
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+};
+
 const CashierAccounts = () => {
   const { branches } = useApp();
   const [items, setItems] = useState([]);
@@ -50,6 +81,7 @@ const CashierAccounts = () => {
   const [submittingKey, setSubmittingKey] = useState("");
   const [branchSelections, setBranchSelections] = useState({});
   const [reviewNotes, setReviewNotes] = useState({});
+  const [openBranchPicker, setOpenBranchPicker] = useState(null);
 
   const totalAccounts = useMemo(
     () => Object.values(counts).reduce((total, current) => total + current, 0),
@@ -150,38 +182,50 @@ const CashierAccounts = () => {
     }
   };
 
+  const handleSelectBranch = (itemId, branchId) => {
+    setBranchSelections((current) => ({
+      ...current,
+      [itemId]: String(branchId || ""),
+    }));
+    setOpenBranchPicker(null);
+  };
+
   return (
     <div className="cashier-accounts-page">
-      <div className="cashier-accounts-header">
-        <div>
-          <h2>Review Akun Kasir</h2>
-          <p>
-            Tinjau pendaftaran kasir baru, tentukan cabang penempatan, lalu aktifkan
-            akun jika data sudah valid.
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => fetchAccounts(filter)} disabled={loading}>
-          {loading ? "Memuat..." : "Refresh Data"}
-        </Button>
-      </div>
+      <PageHeader
+        title="Review Akun Kasir"
+        subtitle="Tinjau pendaftaran kasir baru, tentukan cabang penempatan, lalu aktifkan akun jika data sudah valid."
+        meta={`${totalAccounts} akun`}
+        actions={
+          <Button variant="outline" onClick={() => fetchAccounts(filter)} disabled={loading}>
+            {loading ? "Memuat..." : "Refresh Data"}
+          </Button>
+        }
+      />
 
       <div className="cashier-accounts-stats">
-        <div className="cashier-stat-card">
-          <span>Total Akun Kasir</span>
-          <strong>{totalAccounts}</strong>
-        </div>
-        <div className="cashier-stat-card pending">
-          <span>Menunggu Review</span>
-          <strong>{counts.pending || 0}</strong>
-        </div>
-        <div className="cashier-stat-card active">
-          <span>Akun Aktif</span>
-          <strong>{counts.active || 0}</strong>
-        </div>
-        <div className="cashier-stat-card rejected">
-          <span>Nonaktif / Ditolak</span>
-          <strong>{(counts.inactive || 0) + (counts.rejected || 0)}</strong>
-        </div>
+        {loading && totalAccounts === 0 ? (
+          <CardSkeletonGrid count={4} />
+        ) : (
+          <>
+            <div className="cashier-stat-card">
+              <span>Total Akun Kasir</span>
+              <strong>{totalAccounts}</strong>
+            </div>
+            <div className="cashier-stat-card pending">
+              <span>Menunggu Review</span>
+              <strong>{counts.pending || 0}</strong>
+            </div>
+            <div className="cashier-stat-card active">
+              <span>Akun Aktif</span>
+              <strong>{counts.active || 0}</strong>
+            </div>
+            <div className="cashier-stat-card rejected">
+              <span>Nonaktif / Ditolak</span>
+              <strong>{(counts.inactive || 0) + (counts.rejected || 0)}</strong>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="cashier-filter-row">
@@ -197,27 +241,72 @@ const CashierAccounts = () => {
         ))}
       </div>
 
-      {error && <div className="cashier-page-error">{error}</div>}
+      {error && (
+        <EmptyState
+          icon={AlertCircle}
+          title="Akun kasir gagal dimuat."
+          description={error}
+          actionLabel="Coba Lagi"
+          onAction={() => fetchAccounts(filter)}
+          variant="error"
+        />
+      )}
 
       {loading ? (
-        <div className="cashier-empty-state">Sedang memuat akun kasir...</div>
-      ) : items.length === 0 ? (
-        <div className="cashier-empty-state">
-          Belum ada akun kasir pada filter ini.
+        <div className="cashier-account-grid">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="cashier-account-card cashier-card-skeleton">
+              <div className="cashier-account-top">
+                <div className="cashier-identity">
+                  <Skeleton className="cashier-skeleton-avatar" />
+                  <div className="cashier-skeleton-copy">
+                    <Skeleton className="cashier-skeleton-title" />
+                    <Skeleton className="cashier-skeleton-line short" />
+                  </div>
+                </div>
+                <Skeleton className="cashier-skeleton-status" />
+              </div>
+              <div className="cashier-account-meta">
+                {Array.from({ length: 4 }).map((__, itemIndex) => (
+                  <Skeleton key={itemIndex} className="cashier-skeleton-meta" />
+                ))}
+              </div>
+              <div className="cashier-review-section">
+                <Skeleton className="cashier-skeleton-line" />
+                <Skeleton className="cashier-skeleton-field" />
+                <Skeleton className="cashier-skeleton-area" />
+              </div>
+            </div>
+          ))}
         </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={UserRound}
+          title="Belum ada akun kasir pada filter ini."
+          description="Akun kasir baru akan tampil setelah mereka melakukan pendaftaran."
+        />
       ) : (
         <div className="cashier-account-grid">
           {items.map((item) => {
             const actionKey = `${item.id}:`;
             const isBusy = submittingKey.startsWith(actionKey);
             const selectedBranch = branchSelections[item.id] || String(item.branch_id || "");
+            const selectedBranchData = branches.find(
+              (branch) => String(branch.id) === String(selectedBranch),
+            );
+            const isBranchPickerOpen = openBranchPicker === item.id;
 
             return (
               <div key={item.id} className="cashier-account-card">
                 <div className="cashier-account-top">
-                  <div>
-                    <h3>{item.full_name || item.username}</h3>
-                    <p>@{item.username}</p>
+                  <div className="cashier-identity">
+                    <div className="cashier-avatar">
+                      {getInitials(item.full_name || item.username)}
+                    </div>
+                    <div>
+                      <h3>{item.full_name || item.username}</h3>
+                      <p>@{item.username}</p>
+                    </div>
                   </div>
                   <span className={`cashier-status-badge ${item.status}`}>
                     {STATUS_LABELS[item.status] || item.status}
@@ -226,19 +315,31 @@ const CashierAccounts = () => {
 
                 <div className="cashier-account-meta">
                   <div>
-                    <span>Email</span>
+                    <span>
+                      <Mail size={13} strokeWidth={2.3} />
+                      Email
+                    </span>
                     <strong>{item.email || "-"}</strong>
                   </div>
                   <div>
-                    <span>No. HP</span>
+                    <span>
+                      <Phone size={13} strokeWidth={2.3} />
+                      No. HP
+                    </span>
                     <strong>{item.phone || "-"}</strong>
                   </div>
                   <div>
-                    <span>Cabang Tujuan</span>
+                    <span>
+                      <MapPin size={13} strokeWidth={2.3} />
+                      Cabang Tujuan
+                    </span>
                     <strong>{item.branch_name || "Belum ditentukan"}</strong>
                   </div>
                   <div>
-                    <span>Didaftarkan</span>
+                    <span>
+                      <ClipboardCheck size={13} strokeWidth={2.3} />
+                      Didaftarkan
+                    </span>
                     <strong>{formatDateTime(item.created_at)}</strong>
                   </div>
                 </div>
@@ -251,25 +352,70 @@ const CashierAccounts = () => {
                 )}
 
                 <div className="cashier-review-section">
+                  <div className="cashier-section-title">
+                    <UserRound size={15} strokeWidth={2.3} />
+                    <span>Pengaturan akun kasir</span>
+                  </div>
                   <label>
                     Cabang Penempatan
-                    <select
-                      value={selectedBranch}
-                      onChange={(event) =>
-                        setBranchSelections((current) => ({
-                          ...current,
-                          [item.id]: event.target.value,
-                        }))
-                      }
-                      disabled={isBusy}
+                    <div
+                      className={`branch-picker ${
+                        isBranchPickerOpen ? "open" : ""
+                      } ${isBusy ? "disabled" : ""}`}
                     >
-                      <option value="">Pilih cabang</option>
-                      {branches.map((branch) => (
-                        <option key={branch.id} value={branch.id}>
-                          {branch.name}
-                        </option>
-                      ))}
-                    </select>
+                      <button
+                        type="button"
+                        className="branch-picker-trigger"
+                        onClick={() =>
+                          !isBusy &&
+                          setOpenBranchPicker((current) =>
+                            current === item.id ? null : item.id,
+                          )
+                        }
+                        disabled={isBusy}
+                      >
+                        <span>
+                          <Store size={16} strokeWidth={2.3} />
+                          {selectedBranchData?.name || "Pilih cabang"}
+                        </span>
+                        <ChevronDown size={16} strokeWidth={2.3} />
+                      </button>
+
+                      {isBranchPickerOpen && (
+                        <div className="branch-picker-menu">
+                          <button
+                            type="button"
+                            className={!selectedBranch ? "active" : ""}
+                            onClick={() => handleSelectBranch(item.id, "")}
+                          >
+                            <span>
+                              <strong>Pilih cabang</strong>
+                              <small>Belum ada penempatan</small>
+                            </span>
+                            {!selectedBranch && <Check size={16} strokeWidth={2.4} />}
+                          </button>
+                          {branches.map((branch) => {
+                            const isSelected =
+                              String(branch.id) === String(selectedBranch);
+
+                            return (
+                              <button
+                                key={branch.id}
+                                type="button"
+                                className={isSelected ? "active" : ""}
+                                onClick={() => handleSelectBranch(item.id, branch.id)}
+                              >
+                                <span>
+                                  <strong>{branch.name}</strong>
+                                  <small>{branch.address || "Cabang Locales"}</small>
+                                </span>
+                                {isSelected && <Check size={16} strokeWidth={2.4} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </label>
 
                   <label>

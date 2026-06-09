@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -16,7 +16,7 @@ import StockList from "../pages/stock/StockList";
 import TransactionReport from "../pages/report/TransactionReport";
 import BranchList from "../pages/branch/BranchList";
 import CashierAccounts from "../pages/user/CashierAccounts";
-import { getAuthUser } from "../utils/auth";
+import { AUTH_SESSION_EVENT, getAuthUser } from "../utils/auth";
 
 const isDashboardRole = (role) => role === "admin";
 
@@ -35,6 +35,20 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 };
 
 const AppRoutes = () => {
+  const [, setAuthVersion] = useState(0);
+
+  useEffect(() => {
+    const syncAuth = () => setAuthVersion((version) => version + 1);
+
+    window.addEventListener(AUTH_SESSION_EVENT, syncAuth);
+    window.addEventListener("storage", syncAuth);
+
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EVENT, syncAuth);
+      window.removeEventListener("storage", syncAuth);
+    };
+  }, []);
+
   return (
     <Router>
       <Routes>

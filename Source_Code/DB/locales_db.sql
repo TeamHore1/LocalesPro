@@ -237,6 +237,28 @@ INSERT INTO `transaction_items` (`id`, `transaction_id`, `product_id`, `quantity
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `stock_movements`
+--
+
+CREATE TABLE `stock_movements` (
+  `id` int(11) NOT NULL,
+  `ingredient_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `movement_type` varchar(30) NOT NULL,
+  `direction` enum('in','out') NOT NULL,
+  `quantity` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `stock_before` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `stock_after` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `reference_type` varchar(30) DEFAULT NULL,
+  `reference_id` int(11) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `users`
 --
 
@@ -315,6 +337,15 @@ ALTER TABLE `transaction_items`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indeks untuk tabel `stock_movements`
+--
+ALTER TABLE `stock_movements`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_stock_movements_branch_created` (`branch_id`,`created_at`),
+  ADD KEY `idx_stock_movements_ingredient_created` (`ingredient_id`,`created_at`),
+  ADD KEY `idx_stock_movements_reference` (`reference_type`,`reference_id`);
+
+--
 -- Indeks untuk tabel `users`
 --
 ALTER TABLE `users`
@@ -364,6 +395,12 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `transaction_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+
+--
+-- AUTO_INCREMENT untuk tabel `stock_movements`
+--
+ALTER TABLE `stock_movements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`

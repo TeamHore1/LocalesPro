@@ -1,22 +1,42 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./POS.css";
+import {
+  AlertCircle,
+  ClipboardList,
+  Search,
+  ShoppingBag,
+  Tags,
+  UserRound,
+} from "lucide-react";
 import { formatRupiah } from "../../utils/currency";
 import { useApp } from "../../hooks/useApp";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
+import SideSheet from "../../components/ui/SideSheet";
+import EmptyState from "../../components/ui/EmptyState";
+import { Skeleton } from "../../components/ui/Skeleton";
+import { useToast } from "../../components/ui/Toast";
 
 const toNumber = (value) => {
   const parsed = Number(String(value ?? "").replace(/[^\d]/g, ""));
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const ORDER_TYPES = [
+  { value: "dine-in", label: "Dine in" },
+  { value: "takeaway", label: "Takeaway" },
+];
+
 const POS = () => {
-  const { products, ingredients, processTransaction } = useApp();
+  const { products, ingredients, processTransaction, loading, loadError, refreshData } =
+    useApp();
+  const toast = useToast();
 
   const [cart, setCart] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [searchTerm, setSearchTerm] = useState("");
+  const [orderType, setOrderType] = useState("dine-in");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [cashReceived, setCashReceived] = useState("");
@@ -26,13 +46,28 @@ const POS = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const cashAmount = toNumber(cashReceived);
   const changeAmount = Math.max(cashAmount - totalPrice, 0);
+  const isProductsLoading = loading && products.length === 0;
 
   const categories = useMemo(
-    () => ["Semua", ...new Set(products.map((product) => product.category).filter(Boolean))],
+    () => [
+      "Semua",
+      ...new Set(
+        products
+          .map((product) => String(product.category || "").trim())
+          .filter(Boolean),
+      ),
+    ],
     [products],
   );
+
+  useEffect(() => {
+    if (!categories.includes(selectedCategory)) {
+      setSelectedCategory("Semua");
+    }
+  }, [categories, selectedCategory]);
 
   const filteredProducts = products.filter((product) => {
     const matchCategory =
@@ -79,6 +114,9 @@ const POS = () => {
   };
 
   const isOutOfStock = (product) => getAvailableStockCount(product) <= 0;
+  const getCartQty = (productId) =>
+    cart.find((item) => String(item.id) === String(productId))?.qty || 0;
+  const getProductImage = (product) => product.image || product.image_url || "";
 
   const resetPaymentForm = () => {
     setCashReceived("");
@@ -284,7 +322,7 @@ const POS = () => {
       cart.find((item) => String(item.id) === String(product.id))?.qty || 0;
 
     if (currentQty >= maxAvailable) {
-      window.alert(`Stok bahan untuk ${product.name} tidak cukup.`);
+      toast.warning(`Stok bahan untuk ${product.name} tidak cukup.`);
       return;
     }
 
@@ -320,7 +358,7 @@ const POS = () => {
           }
 
           if (nextQty > maxAvailable) {
-            window.alert(`Stok bahan untuk ${item.name} tidak cukup.`);
+            toast.warning(`Stok bahan untuk ${item.name} tidak cukup.`);
             return item;
           }
 
@@ -396,13 +434,51 @@ const POS = () => {
 
   return (
     <div className="pos-container">
-      <div className="products-section">
-        <div className="products-header">
+      <section className="products-section">
+        <div className="pos-workspace-header">
           <div>
-            <h2>Menu Locales</h2>
-            <p>{filteredProducts.length} menu tersedia untuk dipilih</p>
+            <span className="pos-eyebrow">Point of Sale</span>
+            <h2>Product Lists</h2>
+            <p>Pilih menu, atur jumlah, lalu lanjutkan pembayaran tunai.</p>
           </div>
-          <div className="category-filters">
+          <div className="pos-header-metrics">
+            <span>
+              <ShoppingBag size={16} strokeWidth={2.2} />
+              {filteredProducts.length} tampil
+            </span>
+            <span>
+              <Tags size={16} strokeWidth={2.2} />
+              {Math.max(categories.length - 1, 0)} kategori
+            </span>
+          </div>
+        </div>
+
+        <div className="pos-discovery-card">
+          <div className="pos-discovery-top">
+            <h3>Menu Locales</h3>
+            <span>{isProductsLoading ? "Memuat produk..." : `${products.length} produk`}</span>
+          </div>
+          <div className="pos-search-wrap">
+            <Search size={19} strokeWidth={2.3} />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Cari menu atau kategori..."
+              className="menu-search-input"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                className="clear-search-btn"
+                onClick={() => setSearchTerm("")}
+              >
+                Bersihkan
+              </button>
+            )}
+          </div>
+
+          <div className="category-filter-row" aria-label="Filter kategori menu">
             {categories.map((category) => (
               <button
                 key={category}
@@ -416,65 +492,166 @@ const POS = () => {
           </div>
         </div>
 
-        <div className="pos-toolbar">
-          <input
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="Cari menu atau kategori..."
-            className="menu-search-input"
-          />
-        </div>
-
         <div className="products-grid">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => {
-            const outOfStock = isOutOfStock(product);
-            const availableCount = getAvailableStockCount(product);
-
-            return (
-              <button
-                key={product.id}
-                type="button"
-                className={`product-card ${outOfStock ? "disabled" : ""}`}
-                onClick={() => !outOfStock && addToCart(product)}
-              >
-                {outOfStock && <span className="oos-badge">Habis</span>}
-                <div className="product-image">
-                  {product.image ? (
-                    <img src={product.image} alt={product.name} />
-                  ) : (
-                    <span>Drink</span>
-                  )}
+          {loadError && products.length === 0 ? (
+            <EmptyState
+              icon={AlertCircle}
+              title="Menu gagal dimuat."
+              description={loadError}
+              actionLabel="Coba Lagi"
+              onAction={refreshData}
+              variant="error"
+              className="pos-grid-empty-state"
+            />
+          ) : isProductsLoading ? (
+            Array.from({ length: 6 }).map((_, index) => (
+              <article key={index} className="product-card product-card-skeleton">
+                <Skeleton className="pos-skeleton-image" />
+                <div className="product-card-body">
+                  <div>
+                    <Skeleton className="pos-skeleton-title" />
+                    <Skeleton className="pos-skeleton-price" />
+                  </div>
+                  <div className="product-card-tags">
+                    <Skeleton className="pos-skeleton-chip" />
+                    <Skeleton className="pos-skeleton-chip" />
+                  </div>
                 </div>
-                <h3>{product.name}</h3>
-                <p>{formatRupiah(product.price)}</p>
-                <span className="stock-chip">
-                  {Number.isFinite(availableCount)
-                    ? `${availableCount} porsi`
-                    : "Siap jual"}
-                </span>
-              </button>
-            );
+                <div className="product-card-actions">
+                  <Skeleton className="pos-skeleton-stepper" />
+                  <Skeleton className="pos-skeleton-button" />
+                </div>
+              </article>
+            ))
+          ) : filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => {
+              const outOfStock = isOutOfStock(product);
+              const availableCount = getAvailableStockCount(product);
+              const cartQty = getCartQty(product.id);
+              const productImage = getProductImage(product);
+
+              return (
+                <article
+                  key={product.id}
+                  className={`product-card ${outOfStock ? "disabled" : ""}`}
+                >
+                  {outOfStock && <span className="oos-badge">Habis</span>}
+                  <div className="product-image">
+                    {productImage ? (
+                      <img src={productImage} alt={product.name} />
+                    ) : (
+                      <span>Drink</span>
+                    )}
+                  </div>
+
+                  <div className="product-card-body">
+                    <div>
+                      <h3>{product.name}</h3>
+                      <p>{formatRupiah(product.price)}</p>
+                    </div>
+                    <div className="product-card-tags">
+                      <span>{product.category || "Menu"}</span>
+                      <span>
+                        {Number.isFinite(availableCount)
+                          ? `${availableCount} porsi`
+                          : "Siap jual"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="product-card-actions">
+                    <div className="product-qty-stepper">
+                      <button
+                        type="button"
+                        onClick={() => updateQty(product.id, -1)}
+                        disabled={cartQty === 0}
+                        aria-label={`Kurangi ${product.name}`}
+                      >
+                        -
+                      </button>
+                      <span>{cartQty}</span>
+                      <button
+                        type="button"
+                        onClick={() => !outOfStock && addToCart(product)}
+                        disabled={outOfStock}
+                        aria-label={`Tambah ${product.name}`}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-add-to-cart"
+                      onClick={() => addToCart(product)}
+                      disabled={outOfStock}
+                    >
+                      Add to cart
+                    </button>
+                  </div>
+                </article>
+              );
             })
           ) : (
             <div className="empty-product-state">
-              <p>Menu tidak ditemukan.</p>
+              <EmptyState
+                icon={Search}
+                title="Menu tidak ditemukan."
+                description="Ubah kata kunci atau pilih kategori lain untuk melihat menu yang tersedia."
+                className="pos-grid-empty-state"
+              />
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      <div className="cart-section">
+      <aside className="cart-section">
         <div className="cart-header">
-          <h3>Pesanan Aktif</h3>
-          <Button
-            variant="outline"
-            className="btn-small"
-            onClick={() => setCart([])}
-          >
-            Hapus Semua
-          </Button>
+          <div>
+            <h3>Cart Details</h3>
+            <p>{cartItemCount} item dalam pesanan</p>
+          </div>
+          <button type="button" className="cart-icon-button" aria-label="Detail cart">
+            <ClipboardList size={18} strokeWidth={2.3} />
+          </button>
+        </div>
+
+        <div className="order-type-tabs" aria-label="Tipe pesanan">
+          {ORDER_TYPES.map((type) => (
+            <button
+              key={type.value}
+              type="button"
+              className={orderType === type.value ? "active" : ""}
+              onClick={() => setOrderType(type.value)}
+            >
+              {type.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="customer-card">
+          <div className="cart-section-title">
+            <UserRound size={17} strokeWidth={2.3} />
+            <span>Customer information</span>
+          </div>
+          <label htmlFor="cart-customer-name">Customer name</label>
+          <input
+            id="cart-customer-name"
+            value={customerName}
+            onChange={(event) => setCustomerName(event.target.value)}
+            placeholder="Masukkan nama pelanggan"
+          />
+        </div>
+
+        <div className="cart-items-header">
+          <div>
+            <h4>Order items</h4>
+            <span>{cart.length} menu dipilih</span>
+          </div>
+          {cart.length > 0 && (
+            <button type="button" onClick={() => setCart([])}>
+              Clear all items
+            </button>
+          )}
         </div>
 
         <div className="cart-items">
@@ -483,27 +660,54 @@ const POS = () => {
               <p>Belum ada pesanan.</p>
             </div>
           ) : (
-            cart.map((item) => (
-              <div key={item.id} className="cart-item">
-                <div className="item-info">
-                  <strong>{item.name}</strong>
-                  <span>{formatRupiah(item.price)}</span>
+            cart.map((item) => {
+              const itemImage = getProductImage(item);
+
+              return (
+                <div key={item.id} className="cart-item">
+                  <div className="cart-item-main">
+                    <div className="cart-item-image">
+                      {itemImage ? (
+                        <img src={itemImage} alt={item.name} />
+                      ) : (
+                        <span>Menu</span>
+                      )}
+                    </div>
+                    <div className="item-info">
+                      <strong>{item.name}</strong>
+                      <span>{item.category || "Menu Locales"}</span>
+                    </div>
+                  </div>
+
+                  <div className="cart-item-bottom">
+                    <b>{formatRupiah(item.price * item.qty)}</b>
+                    <div className="item-controls">
+                      <button type="button" onClick={() => updateQty(item.id, -1)}>
+                        -
+                      </button>
+                      <span>{item.qty}</span>
+                      <button type="button" onClick={() => updateQty(item.id, 1)}>
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="item-controls">
-                  <button type="button" onClick={() => updateQty(item.id, -1)}>
-                    -
-                  </button>
-                  <span>{item.qty}</span>
-                  <button type="button" onClick={() => updateQty(item.id, 1)}>
-                    +
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
         <div className="cart-footer">
+          <div className="cart-summary">
+            <div>
+              <span>Sub total</span>
+              <strong>{formatRupiah(totalPrice)}</strong>
+            </div>
+            <div>
+              <span>Discount</span>
+              <strong>{formatRupiah(0)}</strong>
+            </div>
+          </div>
           <div className="total-price">
             <span>Total Bayar</span>
             <span className="price-big">{formatRupiah(totalPrice)}</span>
@@ -516,94 +720,106 @@ const POS = () => {
               setShowPaymentModal(true);
             }}
           >
-            Bayar Sekarang
+            Proceed payment
           </Button>
         </div>
-      </div>
+      </aside>
 
-      {showPaymentModal && (
-        <div className="modal-overlay">
-          <div className="modal-content payment-modal">
-            <div className="modal-header">
-              <h2>Konfirmasi Pembayaran Tunai</h2>
-              <button
-                className="btn-close"
-                onClick={handleClosePaymentModal}
-                type="button"
-              >
-                &times;
-              </button>
-            </div>
-
-            <div className="payment-body">
-              <div className="bill-detail">
-                <span>Total Tagihan</span>
-                <strong className="bill-total">{formatRupiah(totalPrice)}</strong>
-              </div>
-
-              <div className="cash-input-area">
-                <Input
-                  label="Uang Tunai Diterima"
-                  type="number"
-                  value={cashReceived}
-                  onChange={(event) => setCashReceived(event.target.value)}
-                  placeholder="Contoh: 50000"
-                  autoFocus
-                />
-                <div className="quick-cash-grid">
-                  {quickCashOptions.map((amount) => (
-                    <button
-                      key={amount}
-                      type="button"
-                      onClick={() => setCashReceived(String(amount))}
-                    >
-                      {formatRupiah(amount)}
-                    </button>
-                  ))}
-                </div>
-                <div className="change-display">
-                  <span>Kembalian</span>
-                  <strong
-                    className={
-                      cashAmount < totalPrice && cashReceived ? "negative" : "positive"
-                    }
-                  >
-                    {formatRupiah(changeAmount)}
-                  </strong>
-                </div>
-
-                <Input
-                  label="Nama Pelanggan"
-                  value={customerName}
-                  onChange={(event) => setCustomerName(event.target.value)}
-                  placeholder="Opsional"
-                />
-                <div className="payment-note-field">
-                  <label htmlFor="payment-note">Catatan Pembayaran</label>
-                  <textarea
-                    id="payment-note"
-                    rows="3"
-                    value={paymentNote}
-                    onChange={(event) => setPaymentNote(event.target.value)}
-                    placeholder="Opsional: meja, catatan pesanan, atau keterangan lain."
-                  />
-                </div>
-              </div>
-
-              {paymentError && <div className="payment-error">{paymentError}</div>}
-            </div>
-
-            <div className="modal-footer">
-              <Button variant="outline" onClick={handleClosePaymentModal}>
-                Batal
-              </Button>
-              <Button onClick={handleConfirmPayment} disabled={isProcessingPayment}>
-                {isProcessingPayment ? "Memproses..." : "Konfirmasi & Cetak"}
-              </Button>
-            </div>
+      <SideSheet
+        isOpen={showPaymentModal}
+        title="Pembayaran Tunai"
+        subtitle="Selesaikan pembayaran dan cetak struk untuk pesanan ini."
+        onClose={handleClosePaymentModal}
+        width="500px"
+        className="payment-side-sheet"
+        overlayClassName="payment-sheet-overlay"
+        footer={
+          <div className="payment-sheet-footer">
+            <Button variant="outline" onClick={handleClosePaymentModal}>
+              Batal
+            </Button>
+            <Button onClick={handleConfirmPayment} disabled={isProcessingPayment}>
+              {isProcessingPayment ? "Memproses..." : "Konfirmasi & Cetak"}
+            </Button>
           </div>
+        }
+      >
+        <div className="payment-body">
+          <section className="payment-total-card">
+            <span>Total Tagihan</span>
+            <strong>{formatRupiah(totalPrice)}</strong>
+            <small>{cartItemCount} item dalam pesanan</small>
+          </section>
+
+          <section className="payment-section-card">
+            <div className="payment-section-heading">
+              <span>Uang diterima</span>
+              <strong>{formatRupiah(cashAmount)}</strong>
+            </div>
+            <Input
+              label="Uang Tunai Diterima"
+              type="number"
+              value={cashReceived}
+              onChange={(event) => setCashReceived(event.target.value)}
+              placeholder="Contoh: 50000"
+              autoFocus
+            />
+            <div className="quick-cash-grid">
+              {quickCashOptions.map((amount) => (
+                <button
+                  key={amount}
+                  type="button"
+                  onClick={() => setCashReceived(String(amount))}
+                >
+                  {formatRupiah(amount)}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section
+            className={`change-summary-card ${
+              cashAmount < totalPrice && cashReceived ? "warning" : "ready"
+            }`}
+          >
+            <span>
+              {cashAmount < totalPrice && cashReceived
+                ? "Tunai masih kurang"
+                : "Kembalian"}
+            </span>
+            <strong>
+              {cashAmount < totalPrice && cashReceived
+                ? formatRupiah(totalPrice - cashAmount)
+                : formatRupiah(changeAmount)}
+            </strong>
+          </section>
+
+          <section className="payment-section-card">
+            <div className="payment-section-heading">
+              <span>Detail pelanggan</span>
+              <small>Opsional</small>
+            </div>
+            <Input
+              label="Nama Pelanggan"
+              value={customerName}
+              onChange={(event) => setCustomerName(event.target.value)}
+              placeholder="Opsional"
+            />
+            <div className="payment-note-field">
+              <label htmlFor="payment-note">Catatan Pembayaran</label>
+              <textarea
+                id="payment-note"
+                rows="3"
+                value={paymentNote}
+                onChange={(event) => setPaymentNote(event.target.value)}
+                placeholder="Opsional: meja, catatan pesanan, atau keterangan lain."
+              />
+            </div>
+          </section>
+
+          {paymentError && <div className="payment-error">{paymentError}</div>}
         </div>
-      )}
+      </SideSheet>
 
       <Modal
         isOpen={showSuccessModal}

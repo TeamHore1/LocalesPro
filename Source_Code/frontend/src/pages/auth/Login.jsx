@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "./Login.css";
 import logo from "../../assets/locales1.png";
 import bgImage from "../../assets/bg.jpg";
@@ -138,9 +139,30 @@ const Login = () => {
   return (
     <div className="login-body" style={{ backgroundImage: `url(${bgImage})` }}>
       <div className={`container ${isAdminMode ? "active" : ""}`} id="container">
+        <div className="mobile-mode-switch" aria-label="Pilih mode login">
+          <button
+            type="button"
+            className={!isAdminMode ? "active" : ""}
+            onClick={() => switchMode(LOGIN_MODES.cashier)}
+          >
+            Kasir
+          </button>
+          <button
+            type="button"
+            className={isAdminMode ? "active" : ""}
+            onClick={() => switchMode(LOGIN_MODES.dashboard)}
+          >
+            Admin
+          </button>
+        </div>
+
         <div className="form-container sign-up">
           <form onSubmit={handleLogin}>
+            <span className="login-form-eyebrow">Dashboard access</span>
             <h1>Login Admin</h1>
+            <p className="login-form-copy">
+              Masuk untuk mengelola transaksi, stok, cabang, dan laporan.
+            </p>
             {error && isAdminMode && (
               <div className="alert-error" aria-live="polite">
                 {error}
@@ -158,7 +180,7 @@ const Login = () => {
               spellCheck="false"
               minLength={4}
               maxLength={30}
-              pattern="^[a-zA-Z0-9._-]{4,30}$"
+              pattern={"[A-Za-z0-9._\\-]{4,30}"}
               title="Username hanya boleh berisi huruf, angka, titik, garis bawah, atau strip."
               required
             />
@@ -178,8 +200,13 @@ const Login = () => {
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
               >
-                {showPassword ? "Sembunyikan" : "Lihat"}
+                {showPassword ? (
+                  <EyeOff size={17} strokeWidth={2.3} />
+                ) : (
+                  <Eye size={17} strokeWidth={2.3} />
+                )}
               </button>
             </div>
             <button
@@ -194,7 +221,11 @@ const Login = () => {
 
         <div className="form-container sign-in">
           <form onSubmit={handleLogin}>
+            <span className="login-form-eyebrow">POS access</span>
             <h1>Login Kasir</h1>
+            <p className="login-form-copy">
+              Masuk untuk melayani pesanan dan pembayaran cabang aktif.
+            </p>
             {error && !isAdminMode && (
               <div className="alert-error" aria-live="polite">
                 {error}
@@ -212,7 +243,7 @@ const Login = () => {
               spellCheck="false"
               minLength={4}
               maxLength={30}
-              pattern="^[a-zA-Z0-9._-]{4,30}$"
+              pattern={"[A-Za-z0-9._\\-]{4,30}"}
               title="Username hanya boleh berisi huruf, angka, titik, garis bawah, atau strip."
               required
             />
@@ -232,8 +263,13 @@ const Login = () => {
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
               >
-                {showPassword ? "Sembunyikan" : "Lihat"}
+                {showPassword ? (
+                  <EyeOff size={17} strokeWidth={2.3} />
+                ) : (
+                  <Eye size={17} strokeWidth={2.3} />
+                )}
               </button>
             </div>
             <button
@@ -258,7 +294,7 @@ const Login = () => {
               <h2>Mode Admin</h2>
               <button
                 type="button"
-                className="hidden"
+                className="mode-switch-button"
                 onClick={() => switchMode(LOGIN_MODES.cashier)}
               >
                 Login As Kasir
@@ -271,7 +307,7 @@ const Login = () => {
               <h2>Mode Kasir</h2>
               <button
                 type="button"
-                className="hidden"
+                className="mode-switch-button"
                 onClick={() => switchMode(LOGIN_MODES.dashboard)}
               >
                 Login As Admin

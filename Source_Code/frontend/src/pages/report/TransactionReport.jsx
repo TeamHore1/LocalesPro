@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useApp } from "../../hooks/useApp";
 import { formatRupiah } from "../../utils/currency";
+import { getAuthUser } from "../../utils/auth";
 import Modal from "../../components/ui/Modal";
+import PageHeader from "../../components/ui/PageHeader";
+import CustomSelect from "../../components/ui/CustomSelect";
+import EmptyState from "../../components/ui/EmptyState";
+import { CardSkeletonGrid, Skeleton, TableSkeleton } from "../../components/ui/Skeleton";
+import { AlertCircle, FileText, Printer, Search, ShieldCheck } from "lucide-react";
 import "./Report.css";
 
 const normalizePaymentStatus = (status) =>
@@ -20,10 +26,38 @@ const getPaymentMethodClassName = (paymentMethod) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-const TransactionReport = () => {
-  const { transactions = [], voidTransaction, selectedBranch } = useApp();
+const formatDisplayDate = (value) => {
+  if (!value) {
+    return "-";
+  }
 
-  const [filterDate, setFilterDate] = useState("");
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};
+
+const TransactionReport = () => {
+  const {
+    transactions = [],
+    voidTransaction,
+    selectedBranch,
+    loading,
+    loadError,
+    refreshData,
+  } = useApp();
+  const currentUser = getAuthUser();
+  const isInitialLoading = loading && transactions.length === 0;
+
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [filterMethod, setFilterMethod] = useState("Semua Metode");
   const [filterStatus, setFilterStatus] = useState("Semua Status");
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +72,8 @@ const TransactionReport = () => {
       ? trx.items.map((item) => item.name).join(" ")
       : "";
     const keyword = searchQuery.trim().toLowerCase();
-    const matchDate = filterDate ? trxDate === filterDate : true;
+    const matchStartDate = startDate ? trxDate >= startDate : true;
+    const matchEndDate = endDate ? trxDate <= endDate : true;
     const matchMethod =
       filterMethod === "Semua Metode"
         ? true
@@ -52,7 +87,7 @@ const TransactionReport = () => {
       ? `${trx.transaction_code || ""} ${itemsText}`.toLowerCase().includes(keyword)
       : true;
 
-    return matchDate && matchMethod && matchStatus && matchSearch;
+    return matchStartDate && matchEndDate && matchMethod && matchStatus && matchSearch;
   });
 
   const totalIncome = filteredTransactions.reduce(
@@ -71,59 +106,42 @@ const TransactionReport = () => {
     (trx) => normalizePaymentStatus(trx.payment_status) === "voided",
   ).length;
 
-  const exportCsv = () => {
-    const escapeCsv = (value) => {
-      const text = String(value ?? "");
-      return `"${text.replace(/"/g, '""')}"`;
-    };
+  const averageTransaction = paidTransactionsCount
+    ? totalIncome / paidTransactionsCount
+    : 0;
+  const reportPeriod =
+    startDate || endDate
+      ? `${formatDisplayDate(startDate || endDate)} - ${formatDisplayDate(endDate || startDate)}`
+      : "Semua tanggal";
+  const printedAt = new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(new Date());
+  const activeFilterLabels = useMemo(() => {
+    const labels = [];
 
-    const rows = filteredTransactions.map((trx) => [
-      trx.transaction_code || `TRX-${trx.id}`,
-      trx.created_at || "",
-      trx.customer_name || "",
-      Array.isArray(trx.items)
-        ? trx.items.map((item) => `${item.name} (${item.qty ?? item.quantity ?? 0})`).join("; ")
-        : "Menu Locales",
-      trx.total_price || 0,
-      trx.amount_paid || 0,
-      trx.change_amount || 0,
-      trx.payment_method || "Cash",
-      trx.payment_status || "Paid",
-      trx.payment_note || "",
-      trx.void_reason || "",
-      trx.voided_by_name || "",
-      trx.voided_at || "",
-    ]);
+    if (searchQuery.trim()) {
+      labels.push(`Cari: ${searchQuery.trim()}`);
+    }
 
-    const csvContent = [
-      [
-        "ID Transaksi",
-        "Waktu",
-        "Pelanggan",
-        "Item Pesanan",
-        "Total Bayar",
-        "Tunai Diterima",
-        "Kembalian",
-        "Metode",
-        "Status",
-        "Catatan",
-        "Alasan Void",
-        "Void Oleh",
-        "Waktu Void",
-      ],
-      ...rows,
-    ]
-      .map((row) => row.map(escapeCsv).join(","))
-      .join("\n");
+    if (startDate || endDate) {
+      labels.push(
+        `Periode: ${formatDisplayDate(startDate || endDate)} - ${formatDisplayDate(
+          endDate || startDate,
+        )}`,
+      );
+    }
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `laporan-locales-${filterDate || "semua"}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+    if (filterMethod !== "Semua Metode") {
+      labels.push(`Metode: ${filterMethod}`);
+    }
+
+    if (filterStatus !== "Semua Status") {
+      labels.push(`Status: ${filterStatus}`);
+    }
+
+    return labels;
+  }, [endDate, filterMethod, filterStatus, searchQuery, startDate]);
 
   const triggerVoid = (id) => {
     setSelectedId(id);
@@ -182,27 +200,76 @@ const TransactionReport = () => {
         </div>
       </Modal>
 
-      <div className="header-page">
-        <div className="header-title">
-          <h2 style={{ color: "#092379" }}>Laporan Transaksi</h2>
-          <p style={{ color: "#888", fontSize: "14px" }}>
-            Riwayat penjualan cabang{" "}
-            <strong>{selectedBranch?.name || "aktif"}</strong>
-          </p>
+      <PageHeader
+        title="Laporan Transaksi"
+        subtitle={`Riwayat penjualan cabang ${selectedBranch?.name || "aktif"}.`}
+        meta={`${filteredTransactions.length} transaksi`}
+        actions={
+          <div className="report-actions">
+            <button className="btn-print" onClick={() => window.print()}>
+              <Printer size={16} strokeWidth={2.3} />
+              Cetak Laporan
+            </button>
+          </div>
+        }
+      />
+
+      <div className="print-report-header">
+        <div>
+          <span>Locales Boba Tea</span>
+          <h1>Laporan Transaksi</h1>
+          <p>Cabang: {selectedBranch?.name || "Cabang aktif"}</p>
         </div>
-        <div className="report-actions">
-          <button className="btn-export" onClick={exportCsv}>
-            Export CSV
-          </button>
-          <button className="btn-print" onClick={() => window.print()}>
-            Cetak Laporan
-          </button>
+        <div className="print-report-meta">
+          <p>
+            <strong>Periode</strong>
+            {reportPeriod}
+          </p>
+          <p>
+            <strong>Dicetak</strong>
+            {printedAt}
+          </p>
+          <p>
+            <strong>Petugas</strong>
+            {currentUser?.full_name || currentUser?.username || "Admin"}
+          </p>
         </div>
       </div>
 
+      {loadError && transactions.length === 0 ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="Laporan gagal dimuat."
+          description={loadError}
+          actionLabel="Coba Lagi"
+          onAction={refreshData}
+          variant="error"
+        />
+      ) : isInitialLoading ? (
+        <>
+          <CardSkeletonGrid count={5} />
+          <div className="report-loading-filter">
+            <Skeleton className="report-loading-search" />
+            <Skeleton className="report-loading-input" />
+            <Skeleton className="report-loading-input" />
+            <Skeleton className="report-loading-input" />
+          </div>
+          <div className="table-card">
+            <div className="report-table-title">
+              <div>
+                <FileText size={18} strokeWidth={2.3} />
+                <strong>Detail Transaksi</strong>
+              </div>
+              <span>Memuat data</span>
+            </div>
+            <TableSkeleton rows={7} columns={7} />
+          </div>
+        </>
+      ) : (
+        <>
       <div className="report-summary">
         <div className="summary-card main">
-          <span>Total Pendapatan (Filtered)</span>
+          <span>Pendapatan valid</span>
           <h3>{formatRupiah(totalIncome)}</h3>
         </div>
         <div className="summary-card">
@@ -217,61 +284,95 @@ const TransactionReport = () => {
           <span>Void</span>
           <h3>{voidedTransactionsCount}</h3>
         </div>
+        <div className="summary-card">
+          <span>Rata-rata Transaksi</span>
+          <h3>{formatRupiah(averageTransaction)}</h3>
+        </div>
+      </div>
+
+      <div className="report-integrity-card">
+        <div className="report-integrity-icon">
+          <ShieldCheck size={22} strokeWidth={2.3} />
+        </div>
+        <div>
+          <strong>Laporan dibuat untuk cetak atau simpan PDF.</strong>
+          <p>
+            Laporan diarahkan ke format cetak atau PDF supaya data transaksi
+            tidak mudah diubah di luar sistem. Gunakan fitur Cetak Laporan, lalu
+            pilih Save as PDF jika perlu arsip digital.
+          </p>
+        </div>
       </div>
 
       <div className="filter-card">
         <div className="filter-group search">
-          <label>Pencarian:</label>
-          <input
-            type="search"
-            className="filter-input"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Kode transaksi atau item"
-          />
+          <label>Pencarian</label>
+          <div className="report-search-box">
+            <Search size={16} strokeWidth={2.3} />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Kode transaksi atau item"
+            />
+          </div>
         </div>
         <div className="filter-group">
-          <label>Tanggal:</label>
+          <label>Dari Tanggal</label>
           <input
             type="date"
             className="filter-input"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
           />
         </div>
         <div className="filter-group">
-          <label>Metode:</label>
-          <select
+          <label>Sampai Tanggal</label>
+          <input
+            type="date"
             className="filter-input"
-            value={filterMethod}
-            onChange={(e) => setFilterMethod(e.target.value)}
-          >
-            <option value="Semua Metode">Semua Metode</option>
-            {PAYMENT_METHOD_FILTERS.map((method) => (
-              <option key={method.value} value={method.value}>
-                {method.label}
-              </option>
-            ))}
-          </select>
+            value={endDate}
+            min={startDate || undefined}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
         </div>
         <div className="filter-group">
-          <label>Status:</label>
-          <select
-            className="filter-input"
+          <label>Metode</label>
+          <CustomSelect
+            value={filterMethod}
+            onChange={setFilterMethod}
+            placeholder="Semua Metode"
+            options={[
+              { value: "Semua Metode", label: "Semua Metode", description: "Tanpa filter metode" },
+              ...PAYMENT_METHOD_FILTERS.map((method) => ({
+                value: method.value,
+                label: method.label,
+                description: "Metode pembayaran",
+              })),
+            ]}
+          />
+        </div>
+        <div className="filter-group">
+          <label>Status</label>
+          <CustomSelect
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            {STATUS_FILTERS.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterStatus}
+            placeholder="Semua Status"
+            options={STATUS_FILTERS.map((status) => ({
+              value: status.value,
+              label: status.label,
+              description:
+                status.value === "Semua Status"
+                  ? "Tanpa filter status"
+                  : "Status transaksi",
+            }))}
+          />
         </div>
         <button
           className="btn-reset"
           onClick={() => {
-            setFilterDate("");
+            setStartDate("");
+            setEndDate("");
             setFilterMethod("Semua Metode");
             setFilterStatus("Semua Status");
             setSearchQuery("");
@@ -281,7 +382,23 @@ const TransactionReport = () => {
         </button>
       </div>
 
+      {activeFilterLabels.length > 0 && (
+        <div className="active-filter-row">
+          <span>Filter aktif</span>
+          {activeFilterLabels.map((label) => (
+            <strong key={label}>{label}</strong>
+          ))}
+        </div>
+      )}
+
       <div className="table-card">
+        <div className="report-table-title">
+          <div>
+            <FileText size={18} strokeWidth={2.3} />
+            <strong>Detail Transaksi</strong>
+          </div>
+          <span>{filteredTransactions.length} data</span>
+        </div>
         <table className="custom-table">
           <thead>
             <tr>
@@ -319,15 +436,19 @@ const TransactionReport = () => {
                       )}
                     </td>
                     <td>
-                      {datePart} <br />{" "}
-                      <small style={{ color: "#888" }}>{timePart}</small>
+                      <div className="report-date-cell">
+                        <strong>{datePart}</strong>
+                        <span>{timePart}</span>
+                      </div>
                     </td>
                     <td>
-                      {Array.isArray(trx.items)
-                        ? trx.items
-                            .map((item) => `${item.name} (${item.qty ?? item.quantity ?? 0})`)
-                            .join(", ")
-                        : "Menu Locales"}
+                      <div className="report-items-cell">
+                        {Array.isArray(trx.items)
+                          ? trx.items
+                              .map((item) => `${item.name} (${item.qty ?? item.quantity ?? 0})`)
+                              .join(", ")
+                          : "Menu Locales"}
+                      </div>
                     </td>
                     <td className="text-bold">{formatRupiah(trx.total_price)}</td>
                     <td>
@@ -370,15 +491,31 @@ const TransactionReport = () => {
                 <td
                   colSpan="7"
                   className="empty-row"
-                  style={{ textAlign: "center", padding: "40px" }}
                 >
-                  Tidak ada transaksi yang sesuai dengan filter.
+                  <EmptyState
+                    icon={Search}
+                    title="Tidak ada transaksi yang sesuai."
+                    description="Ubah tanggal, status, metode, atau kata kunci pencarian."
+                  />
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <div className="print-signature-block">
+        <div>
+          <span>Mengetahui,</span>
+          <strong>Admin / Owner</strong>
+        </div>
+        <div>
+          <span>Dibuat oleh,</span>
+          <strong>{currentUser?.full_name || currentUser?.username || "Petugas"}</strong>
+        </div>
+      </div>
+        </>
+      )}
     </div>
   );
 };

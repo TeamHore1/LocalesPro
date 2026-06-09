@@ -141,8 +141,7 @@ function validateInventoryAvailabilityForCart(PDO $connection, array $items, int
         $recipeRows = $recipeStatement->fetchAll(PDO::FETCH_ASSOC);
 
         if (!$recipeRows) {
-            $productName = trim((string) ($item["name"] ?? "Produk"));
-            throw new InvalidArgumentException("{$productName} belum memiliki resep bahan baku.");
+            continue;
         }
 
         foreach ($recipeRows as $recipe) {

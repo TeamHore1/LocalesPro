@@ -1,0 +1,127 @@
+.toast-viewport {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 5000;
+  display: flex;
+  width: min(390px, calc(100vw - 32px));
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid #e5ebf7;
+  border-left: 5px solid var(--dark-blue);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  color: #1f2a44;
+  box-shadow: 0 18px 38px rgba(12, 33, 92, 0.16);
+  pointer-events: auto;
+  animation: toast-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top right;
+}
+
+.toast-card.success {
+  border-left-color: #12b76a;
+}
+
+.toast-card.error {
+  border-left-color: var(--danger-red);
+}
+
+.toast-card.warning {
+  border-left-color: var(--primary-yellow);
+}
+
+.toast-card.info {
+  border-left-color: var(--dark-blue);
+}
+
+.toast-icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--soft-blue);
+  color: var(--dark-blue);
+}
+
+.toast-card.success .toast-icon {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.toast-card.error .toast-icon {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.toast-card.warning .toast-icon {
+  background: rgba(214, 178, 47, 0.18);
+  color: var(--dark-blue);
+}
+
+.toast-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.45;
+}
+
+.toast-copy strong {
+  color: var(--dark-blue);
+  font-size: 14px;
+}
+
+.toast-copy span {
+  color: #667085;
+  font-size: 13px;
+}
+
+.toast-close {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #667085;
+  cursor: pointer;
+}
+
+.toast-close:hover {
+  background: #f4f7fe;
+  color: var(--dark-blue);
+  transform: scale(1.06);
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .toast-viewport {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+}

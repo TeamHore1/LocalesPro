@@ -4,29 +4,15 @@
   gap: 22px;
 }
 
-.cashier-accounts-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.cashier-accounts-header h2 {
-  margin: 0 0 8px;
-  color: #092379;
-}
-
-.cashier-accounts-header p {
-  margin: 0;
-  color: #667085;
-  line-height: 1.6;
-  max-width: 720px;
-}
-
 .cashier-accounts-stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+}
+
+.cashier-accounts-stats > .skeleton-card-grid {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .cashier-stat-card {
@@ -34,7 +20,22 @@
   border-radius: 8px;
   padding: 20px;
   border: 1px solid #e5ebf7;
-  box-shadow: 0 10px 28px rgba(12, 33, 92, 0.06);
+  border-top: 4px solid #d6b22f;
+  box-shadow: 0 12px 28px rgba(12, 33, 92, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.cashier-stat-card::after {
+  content: "";
+  position: absolute;
+  right: -26px;
+  top: -26px;
+  width: 78px;
+  height: 78px;
+  border-radius: 8px;
+  background: rgba(214, 178, 47, 0.12);
+  transform: rotate(18deg);
 }
 
 .cashier-stat-card span {
@@ -42,11 +43,12 @@
   color: #667085;
   font-size: 13px;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .cashier-stat-card strong {
   color: #092379;
-  font-size: 28px;
+  font-size: clamp(24px, 2vw, 30px);
 }
 
 .cashier-stat-card.pending {
@@ -65,14 +67,23 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 8px;
+  border: 1px solid #e5ebf7;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(12, 33, 92, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 
 .cashier-filter-button {
-  border: 2px solid #e6ecf8;
-  background: #fff;
+  border: 1px solid transparent;
+  background: #f8faff;
   color: #44506b;
   border-radius: 8px;
-  padding: 10px 16px;
+  min-height: 40px;
+  padding: 9px 15px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -88,9 +99,10 @@
 .cashier-empty-state {
   background: #fff;
   border-radius: 8px;
-  padding: 18px 20px;
+  padding: 20px;
   border: 1px solid #e6ebf7;
   color: #5f6c87;
+  box-shadow: 0 10px 24px rgba(12, 33, 92, 0.05);
 }
 
 .cashier-page-error {
@@ -101,19 +113,78 @@
 
 .cashier-account-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 18px;
 }
 
 .cashier-account-card {
-  background: #fff;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
   border-radius: 8px;
-  padding: 22px;
+  padding: 0;
   border: 1px solid #e6ebf7;
-  box-shadow: 0 14px 32px rgba(12, 33, 92, 0.08);
+  box-shadow: 0 14px 30px rgba(12, 33, 92, 0.07);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  position: relative;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.cashier-account-card:hover {
+  transform: translateY(-2px);
+  border-color: #dbe4ff;
+  box-shadow: 0 18px 36px rgba(9, 35, 121, 0.1);
+}
+
+.cashier-card-skeleton {
+  pointer-events: none;
+}
+
+.cashier-skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+
+.cashier-skeleton-copy {
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cashier-skeleton-title {
+  width: 160px;
+  height: 18px;
+}
+
+.cashier-skeleton-line {
+  width: 100%;
+  height: 15px;
+}
+
+.cashier-skeleton-line.short {
+  width: 104px;
+}
+
+.cashier-skeleton-status {
+  width: 74px;
+  height: 30px;
+}
+
+.cashier-skeleton-meta {
+  height: 68px;
+}
+
+.cashier-skeleton-field {
+  height: 44px;
+}
+
+.cashier-skeleton-area {
+  height: 90px;
 }
 
 .cashier-account-top {
@@ -121,11 +192,37 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+  padding: 18px 18px 14px;
+  border-top: 4px solid #d6b22f;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.cashier-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.cashier-avatar {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #092379;
+  color: #d6b22f;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 12px 22px rgba(9, 35, 121, 0.16);
 }
 
 .cashier-account-top h3 {
   margin: 0 0 6px;
   color: #092379;
+  font-size: 18px;
+  line-height: 1.3;
 }
 
 .cashier-account-top p {
@@ -135,9 +232,10 @@
 
 .cashier-status-badge {
   border-radius: 8px;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 7px 11px;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
 .cashier-status-badge.pending {
@@ -163,29 +261,46 @@
 .cashier-account-meta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.cashier-account-meta div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e8eefc;
+  border-radius: 8px;
+  background: #f8faff;
 }
 
 .cashier-account-meta span,
 .cashier-note-box span,
 .cashier-review-info span,
 .cashier-review-section label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #667085;
   font-size: 12px;
   margin-bottom: 6px;
+  font-weight: 800;
 }
 
 .cashier-account-meta strong,
 .cashier-review-info strong {
   color: #1f2a44;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .cashier-note-box {
   border-radius: 8px;
   background: #f8faff;
+  border: 1px solid #e8eefc;
   padding: 16px;
+  margin: 0 18px;
 }
 
 .cashier-note-box p {
@@ -197,13 +312,29 @@
 .cashier-review-section {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+  margin: 0 18px 18px;
+  padding: 14px;
+  border: 1px solid #e8eefc;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.cashier-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #092379;
+  font-size: 13px;
+  font-weight: 900;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .cashier-review-section select,
 .cashier-review-section textarea {
   width: 100%;
-  border: 2px solid #dfe7f4;
+  border: 2px solid #e1e8f6;
   border-radius: 8px;
   padding: 12px 14px;
   font: inherit;
@@ -223,6 +354,114 @@
   min-height: 90px;
 }
 
+.branch-picker {
+  position: relative;
+}
+
+.branch-picker-trigger {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 2px solid #e1e8f6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #092379;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.branch-picker-trigger span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-picker.open .branch-picker-trigger,
+.branch-picker-trigger:focus-visible {
+  border-color: #092379;
+  box-shadow: 0 0 0 4px rgba(9, 35, 121, 0.08);
+  outline: none;
+}
+
+.branch-picker.disabled .branch-picker-trigger {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.branch-picker-menu {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid #dbe4ff;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 38px rgba(9, 35, 121, 0.18);
+}
+
+.branch-picker-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px;
+  background: transparent;
+  color: #1f2a44;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.branch-picker-menu button:hover {
+  border-color: #dbe4ff;
+  background: #f8faff;
+}
+
+.branch-picker-menu button.active {
+  border-color: #d6b22f;
+  background:
+    linear-gradient(135deg, rgba(214, 178, 47, 0.14), transparent 58%),
+    #f8faff;
+  color: #092379;
+}
+
+.branch-picker-menu button > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.branch-picker-menu strong {
+  color: #092379;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.branch-picker-menu small {
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 .cashier-review-footer {
   display: flex;
   justify-content: space-between;
@@ -230,6 +469,9 @@
   align-items: flex-end;
   flex-wrap: wrap;
   margin-top: auto;
+  padding: 16px 18px;
+  background: #fbfcff;
+  border-top: 1px solid #eef2f7;
 }
 
 .cashier-review-info small {
@@ -245,20 +487,160 @@
   justify-content: flex-end;
 }
 
+.cashier-action-group .btn-custom {
+  min-height: 38px;
+  padding: 9px 13px;
+}
+
 @media (max-width: 960px) {
   .cashier-accounts-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .cashier-accounts-stats > .skeleton-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1440px) {
+  .cashier-accounts-page {
+    gap: 16px;
+  }
+
+  .cashier-accounts-stats {
+    gap: 12px;
+  }
+
+  .cashier-stat-card {
+    padding: 14px;
+  }
+
+  .cashier-stat-card span {
+    font-size: 11px;
+    margin-bottom: 7px;
+  }
+
+  .cashier-stat-card strong {
+    font-size: 22px;
+  }
+
+  .cashier-filter-row {
+    gap: 8px;
+    padding: 6px;
+  }
+
+  .cashier-filter-button {
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .cashier-account-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  .cashier-account-card {
+    padding: 0;
+  }
+
+  .cashier-account-top h3 {
+    font-size: 15px;
+  }
+
+  .cashier-account-top {
+    padding: 14px 14px 12px;
+  }
+
+  .cashier-avatar {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 13px;
+  }
+
+  .cashier-account-top p,
+  .cashier-account-meta strong,
+  .cashier-note-box p,
+  .cashier-review-info strong {
+    font-size: 12px;
+  }
+
+  .cashier-status-badge {
+    padding: 6px 9px;
+    font-size: 10px;
+  }
+
+  .cashier-account-meta {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .cashier-account-meta div {
+    padding: 10px;
+  }
+
+  .cashier-note-box {
+    margin: 0 14px;
+    padding: 12px;
+  }
+
+  .cashier-review-section {
+    margin: 0 14px 14px;
+    padding: 12px;
+  }
+
+  .cashier-section-title {
+    font-size: 12px;
+  }
+
+  .cashier-review-section select,
+  .cashier-review-section textarea {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .cashier-review-footer {
+    padding: 13px 14px;
+  }
+
+  .cashier-action-group .btn-custom {
+    min-height: 34px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 640px) {
-  .cashier-accounts-header {
+  .cashier-accounts-stats,
+  .cashier-account-meta,
+  .cashier-account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-accounts-stats > .skeleton-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-filter-row {
+    gap: 8px;
+  }
+
+  .cashier-filter-button {
+    flex: 1 1 120px;
+  }
+
+  .cashier-account-top,
+  .cashier-identity {
+    align-items: flex-start;
+  }
+
+  .cashier-account-top {
     flex-direction: column;
   }
 
-  .cashier-accounts-stats,
-  .cashier-account-meta {
-    grid-template-columns: 1fr;
+  .cashier-status-badge {
+    align-self: flex-start;
   }
 
   .cashier-review-footer,

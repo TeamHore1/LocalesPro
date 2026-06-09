@@ -5,7 +5,7 @@ import React, {
 } from "react";
 import api from "../services/api";
 import AppStoreContext from "./app-store-context";
-import { getAuthUser } from "../utils/auth";
+import { AUTH_SESSION_EVENT, getAuthSession } from "../utils/auth";
 
 const BRANCH_STORAGE_KEY = "locales_current_branch";
 
@@ -33,14 +33,28 @@ const readSavedBranch = () => {
 
 export const AppProvider = ({ children }) => {
   // --- STATE UTAMA ---
+  const [authSession, setAuthSessionState] = useState(() => getAuthSession());
   const [branches, setBranches] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [stockMovements, setStockMovements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const [selectedBranch, setSelectedBranch] = useState(() => readSavedBranch());
+  const currentUser = authSession?.user || null;
+
+  const clearAppData = useCallback(() => {
+    setBranches([]);
+    setIngredients([]);
+    setProducts([]);
+    setTransactions([]);
+    setStockMovements([]);
+    setLoadError("");
+    setSelectedBranch(null);
+    localStorage.removeItem(BRANCH_STORAGE_KEY);
+  }, []);
 
   const ensureSuccess = (response, fallbackMessage) => {
     const result = response.data;
@@ -84,9 +98,9 @@ export const AppProvider = ({ children }) => {
     [selectedBranch],
   );
 
-  const getActiveBranchId = () => {
+  const getActiveBranchId = useCallback(() => {
     if (!selectedBranch?.id) {
-      return getAuthUser()?.branch_id || null;
+      return currentUser?.branch_id || null;
     }
 
     const matchedBranch = branches.find(
@@ -94,7 +108,7 @@ export const AppProvider = ({ children }) => {
     );
 
     return matchedBranch ? matchedBranch.id : null;
-  };
+  }, [branches, currentUser, selectedBranch]);
 
   const buildBranchParams = useCallback((branchId, extraParams = {}) => {
     const params = { ...extraParams };
@@ -108,8 +122,15 @@ export const AppProvider = ({ children }) => {
 
   // --- 1. FUNGSI FETCH DATA ---
   const refreshData = useCallback(async () => {
+    if (!currentUser) {
+      clearAppData();
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      setLoadError("");
       const resBranch = await api.get("/branches/list.php");
 
       let activeBranchId = null;
@@ -124,7 +145,7 @@ export const AppProvider = ({ children }) => {
 
       // Fallback ke branch_id dari user session jika tidak ada branch aktif
       if (!activeBranchId) {
-        activeBranchId = getAuthUser()?.branch_id || null;
+        activeBranchId = currentUser?.branch_id || null;
       }
 
       const [resIng, resProd, resTrx, resStockMovements] = await Promise.all([
@@ -147,15 +168,40 @@ export const AppProvider = ({ children }) => {
         setStockMovements(resStockMovements.data.data || []);
     } catch (error) {
       console.error("Gagal mengambil data dari server:", error);
+      setLoadError(
+        error.userMessage ||
+          error.response?.data?.message ||
+          error.message ||
+          "Gagal memuat data dari server.",
+      );
     } finally {
       setLoading(false);
     }
-  }, [buildBranchParams, syncSelectedBranch]);
+  }, [buildBranchParams, clearAppData, currentUser, syncSelectedBranch]);
 
   useEffect(() => {
-    const user = getAuthUser();
-    if (user) refreshData();
-  }, [refreshData]);
+    const syncAuthSession = () => {
+      setAuthSessionState(getAuthSession());
+    };
+
+    window.addEventListener(AUTH_SESSION_EVENT, syncAuthSession);
+    window.addEventListener("storage", syncAuthSession);
+
+    return () => {
+      window.removeEventListener(AUTH_SESSION_EVENT, syncAuthSession);
+      window.removeEventListener("storage", syncAuthSession);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      refreshData();
+      return;
+    }
+
+    clearAppData();
+    setLoading(false);
+  }, [clearAppData, currentUser, refreshData]);
 
   useEffect(() => {
     const currentBranch = normalizeBranch(selectedBranch);
@@ -291,23 +337,30 @@ export const AppProvider = ({ children }) => {
   };
 
   // --- 4. TRANSAKSI & STOK ---
-  const updateStock = async (id, amount) => {
+  const updateStock = async (id, amount, notes = "") => {
     try {
-      const target = ingredients.find((ing) => ing.id === id);
-      if (!target) return;
+      const target = ingredients.find((ing) => String(ing.id) === String(id));
+      if (!target) {
+        throw new Error("Bahan stok tidak ditemukan.");
+      }
 
-      // SINKRONISASI: Menggunakan stock_quantity dan min_stock sesuai kolom DB
-      const currentStock = parseFloat(target.stock_quantity || 0);
+      const quantity = parseFloat(amount || 0);
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        throw new Error("Jumlah stok masuk tidak valid.");
+      }
 
-      await updateIngredient(id, {
-        name: target.name,
-        unit: target.unit,
+      const res = await api.post("/stock_movements/create.php", {
+        ingredient_id: id,
         branch_id: target.branch_id,
-        minStock: target.min_stock, // Menjaga nilai min_stock tetap ada saat update
-        stock: currentStock + parseFloat(amount),
+        quantity,
+        notes,
       });
+      const result = ensureSuccess(res, "Gagal mencatat stok masuk.");
+      await refreshData();
+      return result;
     } catch (error) {
       console.error("Gagal update stok:", error);
+      throw error;
     }
   };
 
@@ -318,7 +371,7 @@ export const AppProvider = ({ children }) => {
     paymentDetails = {},
   ) => {
     try {
-      const user = getAuthUser();
+      const user = currentUser;
       if (!user?.id) {
         return { success: false, message: "Sesi login sudah berakhir." };
       }
@@ -347,8 +400,15 @@ export const AppProvider = ({ children }) => {
         return { success: true, transaction: res.data.data };
       }
       return { success: false, message: res.data.message };
-    } catch {
-      return { success: false, message: "Terjadi kesalahan server." };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.userMessage ||
+        error.message ||
+        "Terjadi kesalahan server.";
+
+      console.error("Gagal memproses transaksi:", error);
+      return { success: false, message };
     }
   };
 
@@ -375,7 +435,9 @@ export const AppProvider = ({ children }) => {
         stockMovements,
         branches,
         selectedBranch,
+        currentUser,
         loading,
+        loadError,
         refreshData,
         fetchBranches: refreshData,
         setSelectedBranch,

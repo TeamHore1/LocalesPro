@@ -11,6 +11,7 @@
   justify-content: center;
   z-index: 4000;
   padding: 16px;
+  animation: modalOverlayFade 0.18s ease-out;
 }
 
 .app-modal-content {
@@ -21,7 +22,7 @@
   max-width: 400px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   text-align: center; /* Teks di tengah biar lebih rapi untuk pesan info */
-  animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: modalSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-modal-header h3 {
@@ -54,10 +55,19 @@
 @keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(18px) scale(0.96);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalOverlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

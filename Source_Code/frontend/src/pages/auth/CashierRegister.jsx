@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import CustomSelect from "../../components/ui/CustomSelect";
+import { CheckCircle2, ClipboardCheck, ShieldCheck } from "lucide-react";
 import bgImage from "../../assets/bg.jpg";
 import logo from "../../assets/locales1.png";
 import "./CashierRegister.css";
@@ -203,13 +205,41 @@ const CashierRegister = () => {
       style={{ backgroundImage: `url(${bgImage})` }}
     >
       <div className="cashier-register-card">
-        <div className="cashier-register-brand">
+        <aside className="cashier-register-side">
           <img src={logo} alt="Locales Logo" />
+          <span>Onboarding kasir</span>
+          <h1>Daftar Kasir Locales</h1>
+          <p>
+            Kirim data pendaftaran agar admin dapat menempatkan akun ke cabang
+            yang sesuai.
+          </p>
+
+          <div className="register-flow-list">
+            <div>
+              <ClipboardCheck size={18} strokeWidth={2.3} />
+              <strong>Isi data lengkap</strong>
+              <small>Nama, kontak, username, dan cabang tujuan.</small>
+            </div>
+            <div>
+              <ShieldCheck size={18} strokeWidth={2.3} />
+              <strong>Admin meninjau</strong>
+              <small>Akun diperiksa sebelum akses POS dibuka.</small>
+            </div>
+            <div>
+              <CheckCircle2 size={18} strokeWidth={2.3} />
+              <strong>Login setelah aktif</strong>
+              <small>Kasir bisa masuk setelah disetujui admin.</small>
+            </div>
+          </div>
+        </aside>
+
+        <main className="cashier-register-main">
+        <div className="cashier-register-brand">
           <div>
-            <h1>Daftar Kasir Locales</h1>
+            <span>Form pendaftaran</span>
+            <h2>Data akun kasir</h2>
             <p>
-              Isi data asli dan lengkap agar admin bisa memverifikasi akun Anda
-              dengan cepat.
+              Pastikan data valid agar proses verifikasi admin berjalan cepat.
             </p>
           </div>
         </div>
@@ -256,7 +286,7 @@ const CashierRegister = () => {
                   autoComplete="name"
                   minLength={3}
                   maxLength={100}
-                  pattern="[A-Za-zÀ-ÿ]+(?:[A-Za-zÀ-ÿ.'\s-]*[A-Za-zÀ-ÿ]+)?"
+                  pattern={"[A-Za-zÀ-ÿ]+(?:[A-Za-zÀ-ÿ.'\\s\\-]*[A-Za-zÀ-ÿ]+)?"}
                   title="Gunakan huruf, spasi, titik, tanda petik, atau strip."
                   required
                 />
@@ -286,7 +316,7 @@ const CashierRegister = () => {
                   autoComplete="tel"
                   inputMode="tel"
                   maxLength={16}
-                  pattern="^(?:\+62|62|0)[0-9]{8,13}$"
+                  pattern={"(?:\\+62|62|0)[0-9]{8,13}"}
                   title="Gunakan nomor yang diawali 08, 62, atau +62."
                   required
                 />
@@ -294,26 +324,25 @@ const CashierRegister = () => {
 
               <label>
                 Cabang Tujuan
-                <select
-                  name="branch_id"
+                <CustomSelect
                   value={formData.branch_id}
-                  onChange={handleChange}
+                  onChange={(value) =>
+                    handleChange({ target: { name: "branch_id", value } })
+                  }
                   disabled={isLoadingBranches || branches.length === 0}
-                  required
-                >
-                  <option value="">
-                    {isLoadingBranches
+                  placeholder={
+                    isLoadingBranches
                       ? "Memuat cabang..."
                       : branches.length === 0
                         ? "Tidak ada cabang aktif"
-                        : "Pilih cabang"}
-                  </option>
-                  {branches.map((branch) => (
-                    <option key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </option>
-                  ))}
-                </select>
+                        : "Pilih cabang"
+                  }
+                  options={branches.map((branch) => ({
+                    value: branch.id,
+                    label: branch.name,
+                    description: branch.address || "Cabang Locales",
+                  }))}
+                />
               </label>
 
               <label>
@@ -326,7 +355,7 @@ const CashierRegister = () => {
                   autoComplete="username"
                   minLength={4}
                   maxLength={30}
-                  pattern="^[a-zA-Z0-9._-]{4,30}$"
+                  pattern={"[A-Za-z0-9._\\-]{4,30}"}
                   title="Username hanya boleh berisi huruf, angka, titik, garis bawah, atau strip."
                   required
                 />
@@ -398,6 +427,7 @@ const CashierRegister = () => {
             </div>
           </form>
         )}
+        </main>
       </div>
     </div>
   );

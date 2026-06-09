@@ -1,31 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Archive,
-  Boxes,
+  ChartNoAxesColumn,
+  CupSoda,
   LayoutDashboard,
   LockKeyhole,
   LogOut,
-  MapPin,
-  Package,
-  ReceiptText,
+  Menu,
+  MapPinned,
+  PackageSearch,
   ShoppingCart,
-  Store,
+  UserCog,
   UserRound,
-  Users,
+  Warehouse,
 } from "lucide-react";
 import { useApp } from "../../hooks/useApp";
 import "./Layout.css";
 import logoLocales from "../../assets/locales1.png";
-import { clearAuthSession, getAuthUser } from "../../utils/auth";
+import { clearAuthSession } from "../../utils/auth";
+import PageLoader from "../ui/PageLoader";
 
 const MainLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { selectedBranch, setSelectedBranch, branches } = useApp();
+  const { selectedBranch, setSelectedBranch, branches, currentUser } = useApp();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const currentUser = getAuthUser();
   const isCashier = currentUser?.role === "cashier";
   const canAccessDashboard = currentUser?.role === "admin";
 
@@ -64,7 +65,7 @@ const MainLayout = () => {
   };
 
   if (!currentUser) {
-    return null;
+    return <PageLoader message="Mengalihkan ke halaman login..." />;
   }
 
   const displayUserName =
@@ -77,26 +78,40 @@ const MainLayout = () => {
       ? [
           { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
           { path: "/pos", label: "Kasir POS", icon: ShoppingCart },
-          { path: "/cashier-accounts", label: "Akun Kasir", icon: Users },
-          { path: "/branch", label: "Cabang", icon: Store },
-          { path: "/report", label: "Laporan", icon: ReceiptText },
-          { path: "/product", label: "Produk", icon: Package },
-          { path: "/ingredients", label: "Bahan Baku", icon: Boxes },
-          { path: "/stock", label: "Stok", icon: Archive },
+          { path: "/cashier-accounts", label: "Akun Kasir", icon: UserCog },
+          { path: "/branch", label: "Cabang", icon: MapPinned },
+          { path: "/report", label: "Laporan", icon: ChartNoAxesColumn },
+          { path: "/product", label: "Produk", icon: CupSoda },
+          { path: "/ingredients", label: "Bahan Baku", icon: PackageSearch },
+          { path: "/stock", label: "Stok", icon: Warehouse },
         ]
       : [
           { path: "/pos", label: "Kasir POS", icon: ShoppingCart },
-          { path: "/report", label: "Laporan", icon: ReceiptText },
-          { path: "/stock", label: "Stok", icon: Archive },
+          { path: "/report", label: "Laporan", icon: ChartNoAxesColumn },
+          { path: "/stock", label: "Stok", icon: Warehouse },
         ];
 
   return (
-    <div className="main-container">
-      <aside className="sidebar">
-        <div className="sidebar-logo">
+    <div className="main-container bg-light-gray">
+      <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
+        <div className="sidebar-logo bg-gradient-to-b from-white to-primary-yellow/10">
           <Link to={homePath}>
             <img src={logoLocales} alt="Locales Logo" className="main-logo" />
           </Link>
+        </div>
+
+        <div className="sidebar-context-card">
+          <span className="context-label">Cabang aktif</span>
+          <div className="context-branch-row">
+            <MapPinned size={17} strokeWidth={2.3} aria-hidden="true" />
+            <strong>{selectedBranch?.name || "Belum ada cabang"}</strong>
+          </div>
+          {isCashier && (
+            <span className="sidebar-lock-tag">
+              <LockKeyhole size={12} strokeWidth={2.2} aria-hidden="true" />
+              Terkunci untuk kasir
+            </span>
+          )}
         </div>
 
         <nav className="sidebar-menu">
@@ -107,9 +122,21 @@ const MainLayout = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`menu-item ${location.pathname === item.path ? "active" : ""}`}
+                onClick={() => setIsSidebarOpen(false)}
+                className={`menu-item ${
+                  location.pathname === item.path
+                    ? "active bg-primary-yellow/15 border-primary-yellow text-dark-blue"
+                    : ""
+                }`}
               >
-                <span className="icon" aria-hidden="true">
+                <span
+                  className={`icon ${
+                    location.pathname === item.path
+                      ? "bg-primary-yellow text-dark-blue"
+                      : ""
+                  }`}
+                  aria-hidden="true"
+                >
                   <Icon size={18} strokeWidth={2.2} />
                 </span>
                 <span className="label">{item.label}</span>
@@ -119,9 +146,14 @@ const MainLayout = () => {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="user-brief">
-            <span className="user-name-small">{displayUserName}</span>
-            <span className="role-label">{displayRole}</span>
+          <div className="sidebar-user-card">
+            <div className="sidebar-user-avatar">
+              <UserRound size={17} strokeWidth={2.3} aria-hidden="true" />
+            </div>
+            <div className="user-brief">
+              <span className="user-name-small">{displayUserName}</span>
+              <span className="role-label">{displayRole}</span>
+            </div>
           </div>
           <button
             type="button"
@@ -132,35 +164,24 @@ const MainLayout = () => {
           </button>
         </div>
       </aside>
+      <button
+        type="button"
+        className={`sidebar-scrim ${isSidebarOpen ? "show" : ""}`}
+        aria-label="Tutup menu"
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
       <main className="content">
         <header className="top-nav">
-          <div className="branch-indicator">
-            <MapPin size={16} strokeWidth={2.2} aria-hidden="true" />
-            <span>Lokasi:</span>
-            <strong>
-              {selectedBranch?.name || "Belum ada cabang"}
-            </strong>
-            {isCashier && (
-              <span className="lock-tag">
-                <LockKeyhole size={12} strokeWidth={2.2} aria-hidden="true" />
-                Terkunci
-              </span>
-            )}
-          </div>
-
-          <div className="user-info">
-            <div className="user-text">
-              <span className="user-name">
-                Halo, <strong>{displayUserName}</strong>
-              </span>
-              <span className={`role-badge ${currentUser.role}`}>
-                {displayRole}
-              </span>
-            </div>
-            <div className="user-avatar">
-              <UserRound size={18} strokeWidth={2.2} aria-hidden="true" />
-            </div>
+          <div className="top-nav-left">
+            <button
+              type="button"
+              className="mobile-menu-toggle"
+              aria-label="Buka menu"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={20} strokeWidth={2.4} />
+            </button>
           </div>
         </header>
 

@@ -38,7 +38,7 @@ const resolveBaseUrl = () => {
     return normalizeBaseUrl(joinUrl(origin, basePath, "backend/api"));
   }
 
-  return "http://localhost/LocalesPro-v1-main/backend/api";
+  return "http://localhost/LocalesPro-main/backend/api";
 };
 
 const api = axios.create({

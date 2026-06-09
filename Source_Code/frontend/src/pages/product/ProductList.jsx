@@ -1,13 +1,55 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useApp } from "../../hooks/useApp";
 import { formatRupiah } from "../../utils/currency";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import Modal from "../../components/ui/Modal";
+import PageHeader from "../../components/ui/PageHeader";
+import SideSheet from "../../components/ui/SideSheet";
+import CustomSelect from "../../components/ui/CustomSelect";
+import EmptyState from "../../components/ui/EmptyState";
+import { TableSkeleton } from "../../components/ui/Skeleton";
+import { useToast } from "../../components/ui/Toast";
+import {
+  AlertCircle,
+  ClipboardList,
+  Eye,
+  ImagePlus,
+  ListChecks,
+  Pencil,
+  Search,
+  Tags,
+  Trash2,
+  X,
+} from "lucide-react";
 import "./Product.css";
 
 const ProductList = () => {
-  const { products, ingredients, addProduct, deleteProduct, updateProduct } =
-    useApp();
+  const {
+    products,
+    ingredients,
+    addProduct,
+    deleteProduct,
+    updateProduct,
+    loading,
+    loadError,
+    refreshData,
+  } = useApp();
+  const toast = useToast();
+  const productStatusOptions = [
+    { value: "active", label: "Aktif", description: "Menu tampil di POS" },
+    { value: "inactive", label: "Nonaktif", description: "Menu disembunyikan" },
+  ];
+  const categoryOptions = useMemo(() => {
+    const defaults = ["Milk Tea", "Tea", "Coffee"];
+    const existing = products
+      .map((product) => String(product.category || "").trim())
+      .filter(Boolean);
+
+    return [...new Set([...defaults, ...existing])].sort((a, b) =>
+      a.localeCompare(b, "id-ID"),
+    );
+  }, [products]);
 
   // State untuk Kontrol Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,6 +57,10 @@ const ProductList = () => {
   const [editingId, setEditingId] = useState(null);
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [selectedProductRecipe, setSelectedProductRecipe] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // State Utama Form
   const [formData, setFormData] = useState({
@@ -28,6 +74,42 @@ const ProductList = () => {
 
   // State Input Bahan Sementara
   const [tempIngredient, setTempIngredient] = useState({ id: "", amount: "" });
+  const productStats = useMemo(() => {
+    const active = products.filter(
+      (product) => String(product.status || "active").toLowerCase() === "active",
+    ).length;
+    const categories = new Set(
+      products
+        .map((product) => String(product.category || "").trim())
+        .filter(Boolean),
+    );
+
+    return {
+      total: products.length,
+      active,
+      inactive: Math.max(products.length - active, 0),
+      categories: categories.size,
+    };
+  }, [products]);
+  const filteredProducts = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const category = String(product.category || "Tanpa kategori").trim();
+      const status = String(product.status || "active").toLowerCase();
+      const recipeText = Array.isArray(product.recipe)
+        ? product.recipe.map((item) => item.name).join(" ")
+        : "";
+      const matchKeyword = keyword
+        ? `${product.name || ""} ${category} ${recipeText}`.toLowerCase().includes(keyword)
+        : true;
+      const matchCategory =
+        categoryFilter === "all" ? true : category === categoryFilter;
+      const matchStatus = statusFilter === "all" ? true : status === statusFilter;
+
+      return matchKeyword && matchCategory && matchStatus;
+    });
+  }, [products, searchQuery, categoryFilter, statusFilter]);
 
   // --- 1. Logika File / Gambar (Auto-Crop 1:1) ---
   const handleImageChange = (e) => {
@@ -67,7 +149,7 @@ const ProductList = () => {
   // --- 2. Logika Manajemen Resep ---
   const addIngredientToRecipe = () => {
     if (!tempIngredient.id || !tempIngredient.amount) {
-      alert("Pilih bahan dan isi jumlahnya terlebih dahulu.");
+      toast.warning("Pilih bahan dan isi jumlahnya terlebih dahulu.");
       return;
     }
 
@@ -76,7 +158,7 @@ const ProductList = () => {
     );
 
     if (!ingInfo) {
-      alert("Bahan baku tidak ditemukan!");
+      toast.error("Bahan baku tidak ditemukan.");
       return;
     }
 
@@ -143,8 +225,15 @@ const ProductList = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const normalizedCategory = String(formData.category || "").trim();
+
+    if (!normalizedCategory) {
+      toast.warning("Kategori menu wajib diisi.");
+      return;
+    }
+
     if (formData.recipe.length === 0) {
-      alert("Resep tidak boleh kosong. Tambahkan bahan terlebih dahulu.");
+      toast.warning("Resep tidak boleh kosong. Tambahkan bahan terlebih dahulu.");
       return;
     }
 
@@ -152,7 +241,7 @@ const ProductList = () => {
     const payload = {
       name: formData.name,
       price: parseInt(formData.price),
-      category: formData.category,
+      category: normalizedCategory,
       status: formData.status,
       image_url: formData.image_url,
       recipe: formData.recipe, // Backend harus siap memproses array ini
@@ -166,11 +255,11 @@ const ProductList = () => {
       } else {
         result = await addProduct(payload);
       }
-      alert(result.message || "Menu berhasil disimpan!");
+      toast.success(result.message || "Menu berhasil disimpan.");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Gagal menyimpan produk:", error);
-      alert(
+      toast.error(
         error.response?.data?.message ||
           error.message ||
           "Terjadi kesalahan saat menyimpan produk.",
@@ -179,19 +268,22 @@ const ProductList = () => {
   };
 
   // --- 5. Logika Hapus ---
-  const handleDelete = async (id, name) => {
-    if (window.confirm(`Yakin ingin menghapus menu "${name}"?`)) {
-      try {
-        const result = await deleteProduct(id);
-        alert(result.message || `Menu ${name} berhasil dihapus.`);
-      } catch (error) {
-        console.error("Gagal menghapus:", error);
-        alert(
-          error.response?.data?.message ||
-            error.message ||
-            "Terjadi kesalahan saat menghapus produk.",
-        );
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      const result = await deleteProduct(deleteTarget.id);
+      toast.success(result.message || `Menu ${deleteTarget.name} berhasil dihapus.`);
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error("Gagal menghapus:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan saat menghapus produk.",
+      );
     }
   };
 
@@ -203,366 +295,462 @@ const ProductList = () => {
 
   return (
     <div className="product-container">
-      <div className="header-page">
-        <h2 style={{ color: "#092379" }}>Manajemen Menu & Resep</h2>
-        <Button onClick={openAddModal}>+ Tambah Menu Baru</Button>
+      <PageHeader
+        title="Manajemen Menu & Resep"
+        subtitle="Kelola menu, harga, foto produk, dan kebutuhan bahan per porsi."
+        meta={`${filteredProducts.length} menu`}
+        actions={<Button onClick={openAddModal}>+ Tambah Menu Baru</Button>}
+      />
+
+      <div className="product-summary-grid">
+        <div className="product-stat-card total">
+          <span>Total menu</span>
+          <strong>{productStats.total}</strong>
+          <p>Menu yang terdaftar di katalog</p>
+        </div>
+        <div className="product-stat-card active">
+          <span>Menu aktif</span>
+          <strong>{productStats.active}</strong>
+          <p>Tersedia untuk POS</p>
+        </div>
+        <div className="product-stat-card category">
+          <span>Kategori</span>
+          <strong>{productStats.categories}</strong>
+          <p>Kelompok menu aktif</p>
+        </div>
+        <div className="product-stat-card inactive">
+          <span>Nonaktif</span>
+          <strong>{productStats.inactive}</strong>
+          <p>Disembunyikan dari penjualan</p>
+        </div>
+      </div>
+
+      <div className="product-toolbar">
+        <div className="product-search-box">
+          <Search size={17} strokeWidth={2.3} />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Cari menu, kategori, atau bahan resep..."
+          />
+        </div>
+        <div className="product-filter-group">
+          <CustomSelect
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            aria-label="Filter kategori"
+            placeholder="Semua kategori"
+            options={[
+              { value: "all", label: "Semua kategori", description: "Tampilkan semua menu" },
+              ...categoryOptions.map((category) => ({
+                value: category,
+                label: category,
+                description: "Kategori menu",
+              })),
+            ]}
+          />
+          <div className="product-filter-tabs">
+            {[
+              { value: "all", label: "Semua" },
+              { value: "active", label: "Aktif" },
+              { value: "inactive", label: "Nonaktif" },
+            ].map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                className={statusFilter === item.value ? "active" : ""}
+                onClick={() => setStatusFilter(item.value)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="table-card">
-        <table className="custom-table">
+        {loadError && products.length === 0 ? (
+          <EmptyState
+            icon={AlertCircle}
+            title="Menu gagal dimuat."
+            description={loadError}
+            actionLabel="Coba Lagi"
+            onAction={refreshData}
+            variant="error"
+          />
+        ) : loading ? (
+          <TableSkeleton rows={6} columns={5} />
+        ) : (
+          <table className="custom-table">
           <thead>
             <tr>
               <th>Gambar</th>
               <th>Nama & Resep</th>
+              <th>Kategori</th>
               <th>Harga</th>
+              <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td>
-                  <div className="img-wrapper">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                          borderRadius: "8px",
-                          border: "1px solid #ddd",
-                        }}
-                      />
-                    ) : (
-                      <div className="img-placeholder">Menu</div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="product-info-cell">
-                    <strong>{product.name}</strong>
-                    <div className="recipe-preview-tags">
-                      {product.recipe?.map((r, i) => (
-                        <span key={i} className="tag-ing">
-                          {r.name}
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => {
+                const productStatus = String(product.status || "active").toLowerCase();
+
+                return (
+                  <tr key={product.id}>
+                    <td>
+                      <div className="img-wrapper">
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="product-table-img"
+                          />
+                        ) : (
+                          <div className="img-placeholder">
+                            <ImagePlus size={18} strokeWidth={2.2} />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="product-info-cell">
+                        <strong>{product.name}</strong>
+                        <span className="product-recipe-count">
+                          <ClipboardList size={13} strokeWidth={2.3} />
+                          {product.recipe?.length || 0} bahan resep
                         </span>
-                      ))}
-                    </div>
-                  </div>
-                </td>
-                <td>{formatRupiah(product.price)}</td>
-                <td>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleViewRecipe(product)}
-                    >
-                      Lihat Resep
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => openEditModal(product)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDelete(product.id, product.name)}
-                    >
-                      Hapus
-                    </Button>
-                  </div>
+                        <div className="recipe-preview-tags">
+                          {product.recipe?.slice(0, 4).map((r, i) => (
+                            <span key={i} className="tag-ing">
+                              {r.name}
+                            </span>
+                          ))}
+                          {(product.recipe?.length || 0) > 4 && (
+                            <span className="tag-ing muted">
+                              +{product.recipe.length - 4}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="category-chip">
+                        {product.category || "Tanpa kategori"}
+                      </span>
+                    </td>
+                    <td className="product-price-cell">
+                      {formatRupiah(product.price)}
+                    </td>
+                    <td>
+                      <span className={`product-status-pill ${productStatus}`}>
+                        {productStatus === "active" ? "Aktif" : "Nonaktif"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="product-action-group">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleViewRecipe(product)}
+                        >
+                          <Eye size={14} strokeWidth={2.3} />
+                          Resep
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => openEditModal(product)}
+                        >
+                          <Pencil size={14} strokeWidth={2.3} />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => setDeleteTarget(product)}
+                        >
+                          <Trash2 size={14} strokeWidth={2.3} />
+                          Hapus
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="6" className="product-empty-row">
+                  <EmptyState
+                    icon={Search}
+                    title="Menu tidak ditemukan."
+                    description="Ubah kata kunci, kategori, atau filter status."
+                    actionLabel={products.length === 0 ? "Tambah Menu" : undefined}
+                    onAction={products.length === 0 ? openAddModal : undefined}
+                  />
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
-        </table>
+          </table>
+        )}
       </div>
 
-      {/* --- MODAL FORM --- */}
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>{isEditMode ? "Edit Menu Locales" : "Tambah Menu Baru"}</h3>
-              <button
-                className="btn-close"
-                onClick={() => setIsModalOpen(false)}
-              >
-                &times;
-              </button>
+      <SideSheet
+        isOpen={isModalOpen}
+        title={isEditMode ? "Edit Menu Locales" : "Tambah Menu Baru"}
+        subtitle="Kelola detail menu, foto produk, harga, kategori, dan resep bahan baku per porsi."
+        onClose={() => setIsModalOpen(false)}
+        width="680px"
+        footer={
+          <div className="product-sheet-actions">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Batal
+            </Button>
+            <Button type="submit" form="product-form">
+              {isEditMode ? "Update Menu" : "Simpan Menu"}
+            </Button>
+          </div>
+        }
+      >
+        <form id="product-form" onSubmit={handleSubmit} className="modal-form">
+          <div className="image-upload-section">
+            <div className="product-preview-card">
+              <div className="product-preview-image">
+                {formData.image_url ? (
+                  <img src={formData.image_url} alt="Preview menu" />
+                ) : (
+                  <ImagePlus size={34} strokeWidth={2.2} />
+                )}
+              </div>
+              <div className="product-preview-copy">
+                <span>Preview menu</span>
+                <strong>{formData.name || "Nama menu"}</strong>
+                <p>{formData.category || "Kategori"} - {formData.price ? formatRupiah(formData.price) : "Harga belum diisi"}</p>
+              </div>
+            </div>
+            <Input
+              label="Upload Foto Produk"
+              type="file"
+              onChange={handleImageChange}
+              accept="image/*"
+            />
+          </div>
+
+          <div className="product-detail-panel">
+            <div className="product-panel-heading">
+              <Tags size={17} strokeWidth={2.3} />
+              <div>
+                <strong>Informasi menu</strong>
+                <span>Data yang tampil di POS dan katalog menu.</span>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="image-upload-section">
-                {formData.image_url && (
-                  <img
-                    src={formData.image_url}
-                    alt="Preview"
-                    className="preview-img-form"
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      marginBottom: "10px",
-                    }}
-                  />
-                )}
-                <Input
-                  label="Foto Produk"
-                  type="file"
-                  onChange={handleImageChange}
-                  accept="image/*"
-                />
-              </div>
+            <Input
+              label="Nama Menu"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+            />
 
+            <div className="form-grid">
               <Input
-                label="Nama Menu"
-                value={formData.name}
+                label="Harga"
+                type="number"
+                value={formData.price}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, price: e.target.value })
                 }
                 required
               />
-
-              <div className="form-grid">
-                <Input
-                  label="Harga"
-                  type="number"
-                  value={formData.price}
+              <div className="input-group-custom">
+                <label className="input-label">Kategori</label>
+                <input
+                  className="input-field"
+                  value={formData.category}
                   onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
+                    setFormData({ ...formData, category: e.target.value })
                   }
+                  placeholder="Contoh: Milk Tea, Yakult, Seasonal"
                   required
                 />
-                <div className="input-group-custom">
-                  <label className="input-label">Kategori</label>
-                  <select
-                    className="input-field"
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                  >
-                    <option value="Milk Tea">Milk Tea</option>
-                    <option value="Tea">Tea</option>
-                    <option value="Coffee">Coffee</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="recipe-section-box">
-                <label className="input-label">Atur Resep (Bahan Baku)</label>
-                <div
-                  style={{ display: "flex", gap: "10px", marginBottom: "10px" }}
-                >
-                  <select
-                    className="input-field"
-                    style={{ flex: 2 }}
-                    value={tempIngredient.id}
-                    onChange={(e) =>
-                      setTempIngredient({
-                        ...tempIngredient,
-                        id: e.target.value,
-                      })
-                    }
-                  >
-                    <option value="">Pilih Bahan...</option>
-                    {ingredients.map((ing) => (
-                      <option key={ing.id} value={ing.id}>
-                        {ing.name} ({ing.unit})
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    className="input-field"
-                    style={{ flex: 1 }}
-                    type="number"
-                    step="any"
-                    placeholder="Qty"
-                    value={tempIngredient.amount}
-                    onChange={(e) =>
-                      setTempIngredient({
-                        ...tempIngredient,
-                        amount: e.target.value,
-                      })
-                    }
-                  />
-                  <Button type="button" onClick={addIngredientToRecipe}>
-                    +
-                  </Button>
-                </div>
-
-                <div className="recipe-list-simple">
-                  {formData.recipe.length === 0 && (
-                    <p style={{ fontSize: "12px", color: "#888" }}>
-                      Belum ada bahan.
-                    </p>
-                  )}
-                  {formData.recipe.map((item) => (
-                    <div key={item.ingredientId} className="recipe-item-simple">
-                      <span>
-                        {item.name} ({item.amount} {item.unit})
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeIngredientFromRecipe(item.ingredientId)
-                        }
-                      >
-                        &times;
-                      </button>
-                    </div>
+                <div className="category-suggestion-row">
+                  {categoryOptions.map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      className={formData.category === category ? "active" : ""}
+                      onClick={() => setFormData({ ...formData, category })}
+                    >
+                      {category}
+                    </button>
                   ))}
                 </div>
               </div>
-
-              <div className="modal-footer">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Batal
-                </Button>
-                <Button type="submit">
-                  {isEditMode ? "Update Menu" : "Simpan Menu"}
-                </Button>
+              <div className="input-group-custom">
+                <label className="input-label">Status Menu</label>
+                <CustomSelect
+                  value={formData.status}
+                  options={productStatusOptions}
+                  placeholder="Pilih status"
+                  onChange={(value) => setFormData({ ...formData, status: value })}
+                />
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="recipe-section-box">
+            <div className="product-panel-heading">
+              <ListChecks size={17} strokeWidth={2.3} />
+              <div>
+                <strong>Resep bahan baku</strong>
+                <span>Dipakai untuk validasi dan pengurangan stok otomatis.</span>
+              </div>
+            </div>
+            <div className="recipe-builder-row">
+              <CustomSelect
+                value={tempIngredient.id}
+                placeholder="Pilih bahan..."
+                options={[
+                  { value: "", label: "Pilih bahan...", description: "Belum memilih bahan" },
+                  ...ingredients.map((ing) => ({
+                    value: ing.id,
+                    label: ing.name,
+                    description: `${ing.unit} tersedia`,
+                  })),
+                ]}
+                onChange={(value) =>
+                  setTempIngredient({
+                    ...tempIngredient,
+                    id: value,
+                  })
+                }
+              />
+              <input
+                className="input-field"
+                type="number"
+                step="any"
+                placeholder="Qty"
+                value={tempIngredient.amount}
+                onChange={(e) =>
+                  setTempIngredient({
+                    ...tempIngredient,
+                    amount: e.target.value,
+                  })
+                }
+              />
+              <Button type="button" onClick={addIngredientToRecipe}>
+                +
+              </Button>
+            </div>
+
+            <div className="recipe-list-simple">
+              {formData.recipe.length === 0 && (
+                <p className="empty-recipe-text">Belum ada bahan.</p>
+              )}
+              {formData.recipe.map((item) => (
+                <div key={item.ingredientId} className="recipe-item-simple">
+                  <span>
+                    {item.name} ({item.amount} {item.unit})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      removeIngredientFromRecipe(item.ingredientId)
+                    }
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </form>
+      </SideSheet>
 
       {/* --- MODAL LIHAT RESEP --- */}
       {showRecipeModal && selectedProductRecipe && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: "600px" }}>
-            <div className="modal-header">
-              <h3>Resep: {selectedProductRecipe.name}</h3>
+        <div className="modal-overlay recipe-view-overlay">
+          <div className="modal-content recipe-view-modal">
+            <div className="recipe-view-header">
+              <div>
+                <span>Resep Ingredient</span>
+                <h3>{selectedProductRecipe.name}</h3>
+              </div>
               <button
-                className="btn-close"
+                type="button"
+                className="recipe-view-close"
                 onClick={() => setShowRecipeModal(false)}
+                aria-label="Tutup tabel resep"
               >
-                &times;
+                <X size={20} strokeWidth={2.3} />
               </button>
             </div>
 
             <div className="recipe-detail-container">
-              <div className="recipe-info-header">
-                <p>
-                  <strong>Harga:</strong> {formatRupiah(selectedProductRecipe.price)}
-                </p>
-                <p>
-                  <strong>Kategori:</strong> {selectedProductRecipe.category}
-                </p>
-              </div>
-
-              <h4 style={{ color: "#092379", marginTop: "20px" }}>
-                Bahan Baku yang Dibutuhkan:
-              </h4>
-
               {selectedProductRecipe.recipe &&
               selectedProductRecipe.recipe.length > 0 ? (
-                <table className="custom-table" style={{ marginTop: "10px" }}>
-                  <thead>
-                    <tr>
-                      <th>Nama Bahan</th>
-                      <th>Jumlah</th>
-                      <th>Stok Tersedia</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedProductRecipe.recipe.map((item) => {
-                      const ingredient = ingredients.find(
-                        (ing) => String(ing.id) === String(item.ingredientId)
-                      );
-                      const availableStock = ingredient
-                        ? parseFloat(ingredient.stock_quantity || 0)
-                        : 0;
-                      const needed = parseFloat(item.amount || 0);
-                      const isEnough = availableStock >= needed;
+                <div className="recipe-view-table-wrap">
+                  <table className="recipe-view-table">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Ingredient</th>
+                        <th>Kebutuhan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedProductRecipe.recipe.map((item, index) => {
+                        const ingredient = ingredients.find(
+                          (ing) => String(ing.id) === String(item.ingredientId),
+                        );
+                        const needed = parseFloat(item.amount || 0);
 
-                      return (
-                        <tr key={item.ingredientId}>
-                          <td>{item.name}</td>
-                          <td>
-                            {needed} {item.unit}
-                          </td>
-                          <td
-                            style={{
-                              color: isEnough ? "green" : "red",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {availableStock} {ingredient?.unit || ""}
-                          </td>
-                          <td>
-                            {isEnough ? (
-                              <span
-                                style={{
-                                  color: "green",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                ✓ Cukup
-                              </span>
-                            ) : (
-                              <span
-                                style={{
-                                  color: "red",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                ✗ Kurang
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        return (
+                          <tr key={`${item.ingredientId}-${index}`}>
+                            <td>
+                              <span className="recipe-index">{index + 1}</span>
+                            </td>
+                            <td>
+                              <strong>{item.name}</strong>
+                              <small>{ingredient?.unit || item.unit || "unit"}</small>
+                            </td>
+                            <td>
+                              {needed.toLocaleString("id-ID")} {item.unit}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <p style={{ color: "#888", marginTop: "10px" }}>
-                  Resep belum ditentukan.
-                </p>
+                <EmptyState
+                  icon={ListChecks}
+                  title="Resep belum ditentukan."
+                  description="Tambahkan ingredient pada menu ini agar stok bisa dihitung otomatis."
+                />
               )}
-
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "15px",
-                  backgroundColor: "#f0f4ff",
-                  borderRadius: "8px",
-                  border: "1px solid #d6b22f",
-                }}
-              >
-                <p style={{ margin: "0", fontSize: "14px", color: "#092379" }}>
-                  <strong>Catatan:</strong> Untuk menambah stok produk yang habis,
-                  buka halaman <strong>Bahan Baku</strong> dan tambahkan stok
-                  bahan baku yang ditandai "Kurang".
-                </p>
-              </div>
-
-              <div
-                className="modal-footer"
-                style={{
-                  marginTop: "20px",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button onClick={() => setShowRecipeModal(false)}>Tutup</Button>
-              </div>
             </div>
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={Boolean(deleteTarget)}
+        title="Hapus Menu"
+        message={`Yakin ingin menghapus menu "${deleteTarget?.name || ""}"? Tindakan ini tidak bisa dibatalkan.`}
+        confirmText="Hapus Menu"
+        cancelText="Batal"
+        variant="danger"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

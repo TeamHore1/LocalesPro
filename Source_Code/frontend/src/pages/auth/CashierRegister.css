@@ -1,40 +1,140 @@
 .cashier-register-page {
   min-height: 100vh;
-  padding: 32px 16px;
+  padding: 28px 16px;
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+.cashier-register-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9, 35, 121, 0.38), rgba(9, 35, 121, 0.08)),
+    rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 
 .cashier-register-card {
-  width: min(920px, 100%);
-  background: rgba(255, 255, 255, 0.96);
+  position: relative;
+  z-index: 1;
+  width: min(1080px, 100%);
+  display: grid;
+  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.45fr);
+  background: #ffffff;
   border-radius: 8px;
-  padding: 32px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  padding: 0;
+  box-shadow: 0 28px 70px rgba(9, 35, 121, 0.26);
   backdrop-filter: blur(8px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.cashier-register-side {
+  min-width: 0;
+  padding: 34px 30px;
+  background:
+    linear-gradient(145deg, rgba(214, 178, 47, 0.9), rgba(214, 178, 47, 0.72)),
+    #d6b22f;
+  color: #092379;
+  display: flex;
+  flex-direction: column;
+}
+
+.cashier-register-side img {
+  width: 156px;
+  height: 104px;
+  object-fit: contain;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 12px 18px rgba(9, 35, 121, 0.12));
+}
+
+.cashier-register-side > span,
+.cashier-register-brand span {
+  width: fit-content;
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
+  color: #092379;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cashier-register-side h1 {
+  margin: 14px 0 10px;
+  color: #092379;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.08;
+}
+
+.cashier-register-side p {
+  margin: 0;
+  color: rgba(9, 35, 121, 0.78);
+  line-height: 1.65;
+  font-weight: 700;
+}
+
+.register-flow-list {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.register-flow-list div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  row-gap: 4px;
+  padding: 13px;
+  border: 1px solid rgba(9, 35, 121, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.register-flow-list svg {
+  grid-row: span 2;
+  color: #092379;
+  margin-top: 2px;
+}
+
+.register-flow-list strong {
+  color: #092379;
+  font-size: 13px;
+}
+
+.register-flow-list small {
+  color: rgba(9, 35, 121, 0.72);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cashier-register-main {
+  min-width: 0;
+  padding: 34px;
+  background:
+    linear-gradient(135deg, rgba(214, 178, 47, 0.08), transparent 45%),
+    #ffffff;
 }
 
 .cashier-register-brand {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 
-.cashier-register-brand img {
-  width: 150px;
-  height: 96px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.cashier-register-brand h1 {
-  margin: 0 0 8px;
+.cashier-register-brand h2 {
+  margin: 10px 0 7px;
   color: #092379;
-  font-size: 30px;
+  font-size: 28px;
+  line-height: 1.15;
 }
 
 .cashier-register-brand p {
@@ -60,9 +160,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: #1f2a44;
-  font-size: 14px;
-  font-weight: 600;
+  color: #092379;
+  font-size: 13px;
+  font-weight: 900;
 }
 
 .register-grid input,
@@ -70,11 +170,16 @@
 .register-textarea-field textarea {
   border: 2px solid #dfe7f4;
   border-radius: 8px;
-  padding: 13px 14px;
+  padding: 12px 14px;
   font: inherit;
   color: #1f2937;
   background: #fff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.register-grid .custom-select-trigger {
+  min-height: 49px;
+  padding: 12px 14px;
 }
 
 .register-grid input:focus,
@@ -92,8 +197,11 @@
 
 .register-security-box {
   border-radius: 8px;
-  background: linear-gradient(135deg, #fff7d6, #fdf2b8);
-  color: #7a5a00;
+  background:
+    linear-gradient(135deg, rgba(214, 178, 47, 0.16), transparent 58%),
+    #f8faff;
+  border: 1px solid #dbe4ff;
+  color: #52607d;
   padding: 16px 18px;
   line-height: 1.6;
   font-size: 14px;
@@ -119,9 +227,10 @@
 .register-secondary-button {
   border: none;
   border-radius: 8px;
-  padding: 14px 20px;
+  min-height: 46px;
+  padding: 12px 20px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 900;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
@@ -178,14 +287,114 @@
   margin-top: 16px;
 }
 
-@media (max-width: 760px) {
+@media (min-width: 901px) and (max-width: 1440px) {
+  .cashier-register-page {
+    padding: 20px 14px;
+  }
+
   .cashier-register-card {
+    width: min(920px, 100%);
+    grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.45fr);
+  }
+
+  .cashier-register-side,
+  .cashier-register-main {
+    padding: 24px;
+  }
+
+  .cashier-register-side img {
+    width: 128px;
+    height: 82px;
+    margin-bottom: 14px;
+  }
+
+  .cashier-register-side h1 {
+    font-size: 27px;
+  }
+
+  .cashier-register-side p,
+  .cashier-register-brand p,
+  .register-security-box {
+    font-size: 12px;
+  }
+
+  .register-flow-list {
+    gap: 9px;
+    padding-top: 18px;
+  }
+
+  .register-flow-list div {
+    padding: 10px;
+  }
+
+  .register-flow-list strong,
+  .register-grid label,
+  .register-textarea-field {
+    font-size: 12px;
+  }
+
+  .register-flow-list small {
+    font-size: 10px;
+  }
+
+  .cashier-register-brand h2 {
+    font-size: 23px;
+  }
+
+  .cashier-register-form {
+    gap: 14px;
+  }
+
+  .register-grid {
+    gap: 12px;
+  }
+
+  .register-grid input,
+  .register-grid .custom-select-trigger,
+  .register-textarea-field textarea {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .register-textarea-field textarea {
+    min-height: 82px;
+  }
+
+  .register-primary-button,
+  .register-secondary-button {
+    min-height: 40px;
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .cashier-register-page {
+    padding: 18px 12px;
+    align-items: flex-start;
+  }
+
+  .cashier-register-card {
+    grid-template-columns: 1fr;
+  }
+
+  .cashier-register-side,
+  .cashier-register-main {
     padding: 24px 18px;
   }
 
+  .cashier-register-side img {
+    width: 132px;
+    height: 88px;
+  }
+
+  .cashier-register-card {
+    overflow: visible;
+  }
+
   .cashier-register-brand {
-    flex-direction: column;
-    align-items: flex-start;
+    margin-bottom: 18px;
   }
 
   .register-grid {
