@@ -6,14 +6,38 @@ Basic Path Testing adalah model white box testing yang mengidentifikasi jalur ek
 
 Pada LocalesPro, basic path testing difokuskan pada fungsi `validateInventoryAvailabilityForCart()` karena fungsi ini menjadi inti validasi stok bahan baku sebelum transaksi POS berhasil.
 
-## 2. Tujuan Pengujian
+## 2. Tujuan Dokumen
+
+1. Menjelaskan penerapan Basic Path Testing pada fungsi validasi stok bahan baku.
+2. Menentukan node dan edge dari source code.
+3. Menghitung Cyclomatic Complexity berdasarkan predicate node dan rumus flow graph.
+4. Menentukan independent path dan test case yang mewakili jalur tersebut.
+
+## 3. Ruang Lingkup
+
+Basic Path Testing difokuskan pada fungsi `validateInventoryAvailabilityForCart()` di `backend/config/payment_helpers.php`. Fungsi ini dipilih karena menjadi titik keputusan utama sebelum transaksi POS dinyatakan berhasil dan stok bahan dikurangi.
+
+## 4. Definisi Metode
+
+Basic Path Testing adalah metode white box testing yang menguji jalur independen pada program. Jumlah jalur minimum dihitung menggunakan Cyclomatic Complexity. Dalam materi dosen, rumus yang digunakan adalah `V(G) = E - N + 2P`, dengan `E` sebagai jumlah edge, `N` sebagai jumlah node, dan `P` sebagai jumlah komponen terhubung.
+
+## 5. Prosedur Penerapan
+
+1. Menentukan fungsi yang akan diuji.
+2. Mengubah alur kode menjadi node dan edge.
+3. Mengidentifikasi predicate node.
+4. Menghitung Cyclomatic Complexity.
+5. Menentukan independent path.
+6. Membuat test case untuk setiap path penting.
+
+## 6. Tujuan Pengujian
 
 1. Mengidentifikasi node dan edge pada fungsi validasi stok.
 2. Menghitung Cyclomatic Complexity.
 3. Menentukan jalur independen yang perlu diuji.
 4. Membuat test case berdasarkan jalur independen.
 
-## 3. Source Code yang Diuji
+## 7. Source Code yang Diuji
 
 File:
 
@@ -70,7 +94,7 @@ if ($required > $available) {
 }
 ```
 
-## 4. Node Flow Graph
+## 8. Node Flow Graph
 
 | Node | Proses |
 | --- | --- |
@@ -95,7 +119,7 @@ if ($required > $available) {
 | N19 | Throw error stok kurang |
 | N20 | Validasi selesai tanpa error |
 
-## 5. Perhitungan Cyclomatic Complexity
+## 9. Perhitungan Cyclomatic Complexity
 
 Predicate node yang dihitung:
 
@@ -120,9 +144,25 @@ V(G) = 10 + 1
 V(G) = 11
 ```
 
+Perhitungan ini ekuivalen dengan rumus flow graph dari materi dosen:
+
+```text
+V(G) = E - N + 2P
+```
+
+Keterangan:
+
+| Simbol | Arti |
+| --- | --- |
+| E | Jumlah edge / garis penghubung pada flow graph |
+| N | Jumlah node / titik proses dan keputusan |
+| P | Jumlah komponen terhubung, untuk satu fungsi bernilai 1 |
+
+Pada dokumen ini, perhitungan praktis menggunakan jumlah predicate node + 1 karena fungsi yang diuji merupakan satu komponen terhubung dan predicate node sudah diidentifikasi dari source code.
+
 Artinya minimal terdapat 11 jalur independen yang perlu diuji agar alur validasi stok tercakup.
 
-## 6. Independent Path
+## 10. Independent Path
 
 | Path | Jalur Independen | Expected Result |
 | --- | --- | --- |
@@ -138,7 +178,7 @@ Artinya minimal terdapat 11 jalur independen yang perlu diuji agar alur validasi
 | P10 | Jalur P7 dengan beberapa item transaksi | Semua item divalidasi |
 | P11 | Jalur P7 dilanjutkan ke `applyInventoryUsageForTransaction()` mode deduct | Stok berkurang setelah transaksi berhasil |
 
-## 7. Test Case Basic Path
+## 11. Test Case Basic Path
 
 | ID | Path | Input / Kondisi | Expected Result |
 | --- | --- | --- | --- |
@@ -154,7 +194,19 @@ Artinya minimal terdapat 11 jalur independen yang perlu diuji agar alur validasi
 | BP-10 | P10 | Beberapa item transaksi valid | Semua item divalidasi |
 | BP-11 | P11 | Transaksi berhasil mode deduct | Stok berkurang dan mutasi stok tercatat |
 
-## 8. Panduan Screenshot Manual
+## 12. Kriteria Keberhasilan
+
+1. Seluruh predicate node utama memiliki test case yang mewakili.
+2. Jalur error menghasilkan exception yang sesuai.
+3. Jalur sukses tidak menghasilkan exception dan mengizinkan transaksi dilanjutkan.
+4. Jalur stok kurang berhenti sebelum pengurangan stok terjadi.
+5. Jalur stok cukup dapat dilanjutkan ke proses `applyInventoryUsageForTransaction()`.
+
+## 13. Catatan Flow Graph
+
+Flow graph dapat digambar manual berdasarkan node N1 sampai N20. Node keputusan utama diberi bentuk belah ketupat, sedangkan proses biasa diberi bentuk persegi. Jalur error diarahkan ke node throw exception, sedangkan jalur valid diarahkan ke node selesai tanpa error.
+
+## 14. Panduan Screenshot Manual
 
 | No | Screenshot | Tujuan Bukti |
 | --- | --- | --- |
@@ -174,6 +226,6 @@ screenshot-basicpath-04-cyclomatic-complexity.png
 screenshot-basicpath-05-hasil-uji-path.png
 ```
 
-## 9. Kesimpulan
+## 15. Kesimpulan
 
 Basic path testing pada fungsi `validateInventoryAvailabilityForCart()` menghasilkan Cyclomatic Complexity sebesar 11. Dengan demikian, minimal terdapat 11 jalur independen yang perlu diuji. Jalur tersebut mencakup cabang aktif tidak valid, item tidak valid, resep kosong, resep tidak valid, bahan beda cabang, stok kurang, stok cukup, akumulasi bahan sama, dan pengurangan stok setelah transaksi berhasil.

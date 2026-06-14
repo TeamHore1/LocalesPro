@@ -4,14 +4,37 @@
 
 Code Walkthrough adalah teknik white box testing dengan cara menelusuri source code untuk memahami logika program, menemukan potensi kesalahan, dan memastikan fungsi berjalan sesuai kebutuhan sistem. Pada LocalesPro, code walkthrough dilakukan pada fitur resep produk dan pengurangan stok bahan baku otomatis.
 
-## 2. Tujuan Pengujian
+## 2. Tujuan Dokumen
+
+1. Menjelaskan hasil walkthrough source code fitur bahan baku.
+2. Mengidentifikasi fungsi utama yang terlibat pada resep produk dan transaksi POS.
+3. Menjelaskan peran setiap potongan kode terhadap perubahan stok bahan baku.
+4. Mencatat potensi risiko yang ditemukan dari pembacaan kode.
+
+## 3. Ruang Lingkup
+
+Code walkthrough dilakukan pada file backend yang berhubungan langsung dengan produk, resep bahan baku, transaksi, validasi stok, pengurangan stok, mutasi stok, dan void transaksi. Pembahasan tidak mencakup seluruh kode frontend, kecuali sebagai konteks bahwa POS mengirim data transaksi ke backend.
+
+## 4. Definisi Metode
+
+Code Walkthrough adalah proses membaca dan menelusuri kode secara sistematis untuk memahami cara kerja program. Metode ini dapat dilakukan secara formal atau informal, dan bertujuan menemukan potensi kesalahan logika sebelum atau saat pengujian dilakukan.
+
+## 5. Prosedur Penerapan
+
+1. Menentukan file source code yang akan direview.
+2. Membaca fungsi utama dari awal sampai akhir.
+3. Mengidentifikasi validasi, percabangan, query database, dan perubahan data.
+4. Mencatat potongan kode yang berhubungan langsung dengan kebutuhan fitur.
+5. Menuliskan hasil walkthrough berupa analisis dan potensi temuan.
+
+## 6. Tujuan Pengujian
 
 1. Mengidentifikasi file dan fungsi yang mengatur fitur bahan baku.
 2. Menjelaskan alur kode dari produk dibuat sampai stok berkurang.
 3. Menemukan potensi risiko validasi pada kode.
 4. Menyiapkan dasar untuk control flow, data flow, dan basic path testing.
 
-## 3. File dan Fungsi yang Direview
+## 7. File dan Fungsi yang Direview
 
 | File | Fungsi / Bagian | Hasil Walkthrough |
 | --- | --- | --- |
@@ -22,7 +45,7 @@ Code Walkthrough adalah teknik white box testing dengan cara menelusuri source c
 | `backend/api/transactions/delete.php` | Void transaksi | Transaksi paid dapat diubah menjadi void dan stok dikembalikan |
 | `backend/config/inventory_helpers.php` | Mutasi stok | Setiap perubahan stok dicatat dalam `stock_movements` |
 
-## 4. Walkthrough Source Code
+## 8. Walkthrough Source Code
 
 ### 4.1 Produk wajib memiliki resep
 
@@ -124,7 +147,18 @@ Analisis:
 
 Pengurangan stok dilakukan setelah transaksi dan item transaksi berhasil disimpan. Mode `deduct` membuat nilai `direction = -1`, sehingga stok bahan dikurangi.
 
-## 5. Potensi Temuan dari Walkthrough
+## 9. Traceability Walkthrough
+
+| Kebutuhan Sistem | Potongan Kode yang Direview | Kesimpulan Walkthrough |
+| --- | --- | --- |
+| Produk wajib punya resep | Validasi `$recipe` pada `products/create.php` | Produk tanpa resep dihentikan sebelum insert |
+| Item POS tidak boleh kosong | Validasi `empty($data->items)` | Transaksi kosong ditolak |
+| Produk harus aktif | Validasi status produk | Produk nonaktif tidak dapat menjadi transaksi valid |
+| Pembayaran cash harus cukup | Validasi `$amountPaid < $totalPrice` | Pembayaran kurang menghentikan transaksi |
+| Stok harus cukup | `validateInventoryAvailabilityForCart()` | Stok dicek sebelum transaksi commit |
+| Stok berkurang | `applyInventoryUsageForTransaction(..., "deduct")` | Pengurangan stok dilakukan setelah transaksi tersimpan |
+
+## 10. Potensi Temuan dari Walkthrough
 
 | No | Temuan | Risiko | Rekomendasi |
 | --- | --- | --- | --- |
@@ -133,7 +167,7 @@ Pengurangan stok dilakukan setelah transaksi dan item transaksi berhasil disimpa
 | 3 | Pengurangan stok bergantung pada data `transaction_items` | Jika item gagal tersimpan, stok tidak boleh diproses | Sudah dilindungi transaksi database |
 | 4 | Pencatatan mutasi stok silent return jika data tidak valid | Mutasi bisa tidak tercatat jika ingredient/branch/quantity invalid | Pastikan data mutasi lengkap sebelum pemanggilan |
 
-## 6. Panduan Screenshot Manual
+## 11. Panduan Screenshot Manual
 
 | No | Screenshot | Tujuan Bukti |
 | --- | --- | --- |
@@ -152,6 +186,6 @@ screenshot-walkthrough-03-validasi-stok.png
 screenshot-walkthrough-04-void-transaksi.png
 ```
 
-## 7. Kesimpulan
+## 12. Kesimpulan
 
 Code walkthrough menunjukkan bahwa fitur bahan baku dikendalikan oleh backend melalui validasi resep, validasi transaksi, validasi stok, pengurangan stok, dan pencatatan mutasi. Kode utama sudah membentuk alur transaksi yang aman karena menggunakan validasi dan rollback. Beberapa risiko validasi tetap perlu dicatat sebagai bahan perbaikan, terutama validasi harga produk dan audit produk lama tanpa resep.

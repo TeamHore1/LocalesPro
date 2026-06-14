@@ -6,14 +6,37 @@ Control Flow Testing adalah model white box testing yang berfokus pada alur kont
 
 Pada LocalesPro, control flow testing difokuskan pada alur transaksi POS yang mempengaruhi stok bahan baku.
 
-## 2. Tujuan Pengujian
+## 2. Tujuan Dokumen
+
+1. Menjelaskan alur kontrol kode transaksi bahan baku.
+2. Memetakan node, edge, dan percabangan utama.
+3. Menentukan jalur berhasil dan jalur gagal pada transaksi POS.
+4. Menjadi dasar untuk Basic Path Testing dan Cyclomatic Complexity.
+
+## 3. Ruang Lingkup
+
+Control flow testing mencakup alur `transactions/create.php` dan pemanggilan validasi stok pada `payment_helpers.php`. Fokusnya adalah percabangan yang menentukan apakah transaksi dilanjutkan, ditolak, rollback, atau berhasil commit.
+
+## 4. Definisi Metode
+
+Control Flow Testing adalah pengujian white box yang memeriksa urutan eksekusi kode dan jalur logika yang mungkin dilalui program. Metode ini memastikan setiap cabang validasi dapat dijelaskan dan diuji.
+
+## 5. Prosedur Penerapan
+
+1. Menentukan fungsi utama yang diuji.
+2. Mengidentifikasi percabangan `if`, `foreach`, dan `catch`.
+3. Menyusun node dan edge alur kontrol.
+4. Menentukan skenario jalur berhasil dan jalur gagal.
+5. Membandingkan jalur yang diharapkan dengan perilaku kode.
+
+## 6. Tujuan Pengujian
 
 1. Memetakan alur kontrol transaksi POS dari input sampai stok berubah.
 2. Mengidentifikasi percabangan penting pada validasi transaksi dan stok.
 3. Memastikan jalur gagal berhenti sebelum stok berubah.
 4. Memastikan jalur berhasil melakukan commit transaksi dan pengurangan stok.
 
-## 3. Source Code yang Diuji
+## 7. Source Code yang Diuji
 
 | File | Bagian Kontrol |
 | --- | --- |
@@ -21,7 +44,7 @@ Pada LocalesPro, control flow testing difokuskan pada alur transaksi POS yang me
 | `backend/config/payment_helpers.php` | Validasi stok berdasarkan resep, akumulasi kebutuhan bahan |
 | `backend/api/transactions/delete.php` | Validasi void transaksi dan pemulihan stok |
 
-## 4. Potongan Kode Percabangan
+## 8. Potongan Kode Percabangan
 
 ```php
 if (empty($data->items) || !is_array($data->items)) {
@@ -54,7 +77,7 @@ if ($required > $available) {
 }
 ```
 
-## 5. Node Alur Kontrol Transaksi POS
+## 9. Node Alur Kontrol Transaksi POS
 
 | Node | Proses |
 | --- | --- |
@@ -78,7 +101,7 @@ if ($required > $available) {
 | N18 | Return response success |
 | N19 | Catch error, rollback, return response error |
 
-## 6. Edge / Hubungan Antar Node
+## 10. Edge / Hubungan Antar Node
 
 | Edge | Dari | Ke | Kondisi |
 | --- | --- | --- | --- |
@@ -96,7 +119,7 @@ if ($required > $available) {
 | E12 | N16 | N17 | Stok berhasil dikurangi |
 | E13 | N17 | N18 | Commit berhasil |
 
-## 7. Skenario Control Flow
+## 11. Skenario Control Flow
 
 | ID | Jalur | Kondisi | Expected Result |
 | --- | --- | --- | --- |
@@ -108,7 +131,26 @@ if ($required > $available) {
 | CF-06 | N1-N2-N3-N4-N5-N6-N7-N8-N9-N10-N11-N12-N19 | Uang tunai kurang | Rollback, stok tidak berubah |
 | CF-07 | N1-N2-N3-N4-N5-N6-N7-N8-N9-N10-N11-N12-N13-N19 | Stok bahan kurang | Rollback, stok tidak berubah |
 
-## 8. Panduan Screenshot Manual
+## 12. Matriks Percabangan
+
+| Percabangan | Kondisi True | Kondisi False | Dampak |
+| --- | --- | --- | --- |
+| `empty($data->items)` | Transaksi ditolak | Lanjut resolve cabang | Mencegah transaksi kosong |
+| `$productId <= 0 || $quantity <= 0` | Throw error item invalid | Lanjut ambil produk | Mencegah item rusak diproses |
+| Produk tidak ada / inactive | Throw error produk tidak tersedia | Lanjut validasi cabang | Mencegah produk tidak valid dijual |
+| Produk beda cabang | Throw error cabang | Lanjut hitung total | Mencegah stok lintas cabang |
+| `$totalPrice <= 0` | Throw error total invalid | Lanjut pembayaran | Mencegah transaksi bernilai nol |
+| Cash dan uang kurang | Throw error uang kurang | Lanjut validasi stok | Mencegah transaksi tidak lunas |
+| Stok kurang | Throw error stok kurang | Lanjut simpan transaksi | Mencegah stok negatif |
+
+## 13. Kriteria Keberhasilan
+
+1. Setiap cabang error berhenti sebelum stok berubah.
+2. Jalur sukses melewati seluruh validasi sebelum commit.
+3. Rollback terjadi ketika exception muncul di dalam transaksi database.
+4. Pengurangan stok hanya terjadi setelah transaksi dan item transaksi tersimpan.
+
+## 14. Panduan Screenshot Manual
 
 | No | Screenshot | Tujuan Bukti |
 | --- | --- | --- |
@@ -128,6 +170,6 @@ screenshot-control-04-validasi-stok.png
 screenshot-control-05-flowgraph.png
 ```
 
-## 9. Kesimpulan
+## 15. Kesimpulan
 
 Control flow testing menunjukkan bahwa transaksi POS memiliki jalur berhasil dan beberapa jalur gagal. Jalur gagal diarahkan ke exception dan rollback, sehingga stok bahan tidak berubah jika transaksi tidak valid. Jalur berhasil melewati validasi item, produk, cabang, pembayaran, stok, lalu menyimpan transaksi dan mengurangi stok bahan.

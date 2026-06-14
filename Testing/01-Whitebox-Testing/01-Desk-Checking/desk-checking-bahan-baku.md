@@ -6,7 +6,33 @@ Desk Checking adalah metode white box testing yang dilakukan dengan menelusuri k
 
 Fokus desk checking pada dokumen ini adalah alur produk yang memiliki resep bahan baku. Ketika produk dijual melalui POS, sistem membaca resep produk, menghitung total kebutuhan bahan, memvalidasi stok, menyimpan transaksi, mengurangi stok bahan, dan mencatat mutasi stok.
 
-## 2. Tujuan Pengujian
+## 2. Tujuan Dokumen
+
+1. Menjelaskan penerapan Desk Checking pada fitur bahan baku LocalesPro.
+2. Menelusuri nilai variabel penting secara manual berdasarkan source code.
+3. Membuktikan bahwa perhitungan stok dapat ditelusuri dari kode, bukan hanya dari tampilan aplikasi.
+4. Menyediakan tabel pemeriksaan manual untuk skenario transaksi berhasil dan gagal.
+
+## 3. Ruang Lingkup
+
+Desk checking dilakukan pada alur transaksi POS yang menggunakan produk dengan resep bahan baku. Pemeriksaan mencakup nilai `items`, `qty`, `totalPrice`, `amountPaid`, kebutuhan bahan, stok awal, stok akhir, dan mutasi stok.
+
+Pengujian tidak mencakup validasi tampilan frontend, styling UI, atau performa aplikasi.
+
+## 4. Definisi Metode
+
+Desk Checking adalah pemeriksaan manual terhadap kode program dengan cara mengikuti alur eksekusi dan mencatat nilai variabel pada setiap langkah. Metode ini membantu menemukan kesalahan logika tanpa harus menjalankan semua kemungkinan input pada sistem.
+
+## 5. Prosedur Penerapan
+
+1. Menentukan alur kode yang akan diperiksa.
+2. Menentukan data uji transaksi dan resep bahan baku.
+3. Membaca potongan kode yang memproses input tersebut.
+4. Menghitung nilai variabel secara manual.
+5. Membandingkan hasil perhitungan manual dengan expected result sistem.
+6. Mencatat potensi error jika terdapat nilai yang tidak sesuai.
+
+## 6. Tujuan Pengujian
 
 1. Memeriksa nilai variabel utama pada proses transaksi bahan baku.
 2. Memastikan perhitungan kebutuhan bahan sesuai rumus `quantity_needed * qty produk`.
@@ -14,7 +40,7 @@ Fokus desk checking pada dokumen ini adalah alur produk yang memiliki resep baha
 4. Memastikan stok berkurang jika transaksi berhasil.
 5. Memastikan alur manual sesuai dengan logika kode program.
 
-## 3. Source Code yang Diperiksa
+## 7. Source Code yang Diperiksa
 
 | File | Fungsi / Bagian Kode | Peran |
 | --- | --- | --- |
@@ -23,7 +49,7 @@ Fokus desk checking pada dokumen ini adalah alur produk yang memiliki resep baha
 | `backend/config/payment_helpers.php` | `applyInventoryUsageForTransaction()` | Mengurangi atau mengembalikan stok bahan |
 | `backend/config/inventory_helpers.php` | `recordStockMovement()` | Mencatat riwayat mutasi stok |
 
-## 4. Potongan Kode Utama
+## 8. Potongan Kode Utama
 
 ### 4.1 Validasi item transaksi
 
@@ -62,7 +88,7 @@ $delta = round($direction * $totalUsage, 2);
 $stockAfter = round($stockBefore + $delta, 2);
 ```
 
-## 5. Data Uji Desk Checking
+## 9. Data Uji Desk Checking
 
 | Data | Nilai |
 | --- | --- |
@@ -81,7 +107,7 @@ Resep produk:
 | Keju | 1.000 gr | 100 gr |
 | Sirup Gula Aren | 1.500 ml | 10 ml |
 
-## 6. Tabel Desk Checking
+## 10. Tabel Desk Checking
 
 | Langkah | Kode / Proses | Nilai Variabel | Expected Result |
 | --- | --- | --- | --- |
@@ -99,7 +125,7 @@ Resep produk:
 | 12 | Kurangi stok Sirup | `1500 - 30 = 1470` | Stok akhir 1470 ml |
 | 13 | Catat mutasi stok | `movement_type = sale`, `direction = out` | Riwayat stok keluar tercatat |
 
-## 7. Skenario Gagal yang Dicek Manual
+## 11. Skenario Gagal yang Dicek Manual
 
 | Skenario | Nilai Variabel | Expected Result |
 | --- | --- | --- |
@@ -109,7 +135,17 @@ Resep produk:
 | Pembayaran kurang | `amountPaid = 20000`, `totalPrice = 30000` | Throw error uang tunai kurang |
 | Produk beda cabang | `product.branch_id != branchId` | Throw error produk tidak tersedia untuk cabang aktif |
 
-## 8. Panduan Screenshot Manual
+## 12. Format Pencatatan Hasil Desk Checking
+
+| Komponen | Nilai Manual | Nilai dari Sistem / Kode | Status | Catatan |
+| --- | --- | --- | --- | --- |
+| Total transaksi | Rp 30.000 | Diisi saat eksekusi | Pass / Fail | Cocok jika `price * qty` sama |
+| Kebutuhan Sedotan | 3 pcs | Diisi saat eksekusi | Pass / Fail | Cocok jika `1 * 3` |
+| Kebutuhan Keju | 300 gr | Diisi saat eksekusi | Pass / Fail | Cocok jika `100 * 3` |
+| Kebutuhan Sirup | 30 ml | Diisi saat eksekusi | Pass / Fail | Cocok jika `10 * 3` |
+| Stok akhir | 7, 700, 1470 | Diisi saat eksekusi | Pass / Fail | Cocok jika stok awal dikurangi kebutuhan |
+
+## 13. Panduan Screenshot Manual
 
 Tambahkan screenshot berikut secara manual ke folder GitHub jika dibutuhkan:
 
@@ -131,6 +167,6 @@ screenshot-desk-04-pos-berhasil.png
 screenshot-desk-05-stok-akhir.png
 ```
 
-## 9. Kesimpulan
+## 14. Kesimpulan
 
 Berdasarkan desk checking, alur kode transaksi bahan baku sudah menunjukkan hubungan yang jelas antara input transaksi, resep produk, validasi stok, dan pengurangan stok. Pada skenario valid, stok berkurang sesuai resep. Pada skenario gagal seperti item kosong, qty tidak valid, stok kurang, atau pembayaran kurang, transaksi dihentikan sebelum stok berubah.

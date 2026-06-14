@@ -6,7 +6,27 @@ Dokumen ini merupakan pengantar untuk paket white box testing fitur bahan baku p
 
 White box testing dilakukan dengan melihat struktur internal kode program. Oleh karena itu, setiap dokumen metode menyertakan file kode yang diuji, potongan source code penting, analisis logika, serta panduan screenshot manual yang dapat ditambahkan sebagai bukti pengujian.
 
-## 2. Fitur yang Diuji
+## 2. Tujuan Dokumen
+
+1. Menjelaskan rancangan white box testing fitur bahan baku LocalesPro berdasarkan source code aplikasi.
+2. Menentukan file, fungsi, variabel, percabangan, loop, dan jalur eksekusi yang diuji.
+3. Menyediakan dokumen pengujian untuk setiap metode white box yang digunakan.
+4. Membuktikan bahwa proses pengurangan stok bahan baku tidak hanya berjalan dari sisi tampilan, tetapi juga sesuai logika internal backend.
+5. Menjadi dasar untuk eksekusi pengujian, dokumentasi bukti screenshot, dan pembahasan hasil pengujian.
+
+## 3. Ruang Lingkup
+
+Ruang lingkup white box testing ini dibatasi pada fitur bahan baku yang terhubung dengan produk, resep, transaksi POS, pengurangan stok, mutasi stok, dan void transaksi. Pengujian dilakukan dengan membaca kode backend karena logika utama stok berada pada API PHP dan helper inventory/payment.
+
+Dokumen ini tidak membahas pengujian tampilan UI secara visual, performa server, keamanan token, atau deployment hosting. Fokusnya adalah struktur internal program yang memproses stok bahan baku.
+
+## 4. Definisi White Box Testing
+
+White box testing adalah metode pengujian perangkat lunak yang memeriksa struktur internal, logika program, alur kontrol, alur data, dan source code aplikasi. Berbeda dengan black box testing yang hanya melihat input dan output, white box testing menganalisis bagaimana sistem memproses input tersebut di dalam kode program.
+
+Pada LocalesPro, white box testing digunakan untuk memastikan bahwa transaksi POS benar-benar memanggil fungsi validasi stok, menghitung kebutuhan bahan dari resep, mengurangi stok setelah transaksi berhasil, mencatat mutasi stok, dan mengembalikan stok saat transaksi di-void.
+
+## 5. Fitur yang Diuji
 
 Fitur utama yang diuji adalah proses berikut:
 
@@ -19,7 +39,7 @@ Fitur utama yang diuji adalah proses berikut:
 7. Mutasi stok dicatat sebagai riwayat stok keluar.
 8. Jika transaksi di-void, stok bahan dikembalikan.
 
-## 3. Source Code Utama
+## 6. Source Code Utama
 
 | File | Fungsi dalam Pengujian |
 | --- | --- |
@@ -30,7 +50,7 @@ Fitur utama yang diuji adalah proses berikut:
 | `backend/config/payment_helpers.php` | Validasi stok, perhitungan kebutuhan bahan, pengurangan dan pengembalian stok |
 | `backend/config/inventory_helpers.php` | Mencatat riwayat mutasi stok |
 
-## 4. Metode White Box yang Digunakan
+## 7. Metode White Box yang Digunakan
 
 Metode mengikuti struktur folder yang sudah disiapkan pada repository:
 
@@ -42,7 +62,7 @@ Metode mengikuti struktur folder yang sudah disiapkan pada repository:
 | 4 | `04-Data-Flow-Testing` | Data Flow Testing | Pelacakan data dari input POS sampai stok berubah |
 | 5 | `05-Basic-Path-Testing` | Basic Path Testing | Flow graph, Cyclomatic Complexity, dan independent path |
 
-## 5. Data Uji Global
+## 8. Data Uji Global
 
 | Data | Nilai |
 | --- | --- |
@@ -61,7 +81,29 @@ Resep produk:
 | Keju | 1.000 gr | 100 gr | 700 gr |
 | Sirup Gula Aren | 1.500 ml | 10 ml | 1.470 ml |
 
-## 6. Panduan Umum Screenshot
+## 9. Traceability Source Code ke Fitur
+
+| Kebutuhan Fitur | Source Code yang Membuktikan | Metode yang Relevan |
+| --- | --- | --- |
+| Produk wajib memiliki resep bahan baku | `products/create.php`, `products/update.php` | Desk Checking, Code Walkthrough |
+| Transaksi POS tidak boleh kosong | `transactions/create.php` | Control Flow, Basic Path |
+| Produk nonaktif tidak boleh dijual | `transactions/create.php` | Code Walkthrough, Control Flow |
+| Produk beda cabang tidak boleh diproses | `transactions/create.php`, `payment_helpers.php` | Control Flow, Basic Path |
+| Stok bahan harus cukup sebelum transaksi berhasil | `validateInventoryAvailabilityForCart()` | Data Flow, Basic Path |
+| Stok berkurang setelah transaksi paid | `applyInventoryUsageForTransaction()` | Desk Checking, Data Flow |
+| Mutasi stok tercatat | `recordStockMovement()` | Code Walkthrough, Data Flow |
+| Void mengembalikan stok | `transactions/delete.php`, `applyInventoryUsageForTransaction(..., "restore")` | Data Flow, Code Walkthrough |
+
+## 10. Kriteria Keberhasilan Umum
+
+1. Setiap dokumen metode mengacu pada source code asli aplikasi.
+2. Setiap alur utama memiliki potongan kode dan analisis logika.
+3. Jalur berhasil dan jalur gagal pada transaksi bahan baku dapat dijelaskan dari kode.
+4. Variabel penting seperti `qty`, `required`, `available`, `delta`, dan `stockAfter` dapat ditelusuri.
+5. Basic Path Testing memiliki node, predicate, Cyclomatic Complexity, dan independent path.
+6. Panduan screenshot tersedia untuk membantu penambahan bukti pengujian manual.
+
+## 11. Panduan Umum Screenshot
 
 Screenshot tidak dimasukkan langsung ke dokumen ini agar repository tetap rapi. Screenshot dapat ditambahkan manual ke folder metode masing-masing dengan nama file yang sesuai.
 
@@ -78,6 +120,6 @@ Screenshot yang disarankan:
 | 7 | Halaman stok setelah transaksi | Folder metode yang membahas perubahan stok |
 | 8 | Riwayat mutasi stok | Folder metode yang membahas mutasi stok |
 
-## 7. Kesimpulan
+## 12. Kesimpulan
 
 Paket white box testing ini dirancang agar sesuai dengan definisi white box testing, yaitu pengujian yang melihat isi kode dan struktur internal sistem. Dengan lima metode yang digunakan, pengujian tidak hanya membahas output aplikasi, tetapi juga logika kode, percabangan, aliran data, jalur independen, dan nilai variabel yang mempengaruhi stok bahan baku.

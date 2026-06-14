@@ -4,14 +4,37 @@
 
 Data Flow Testing adalah metode white box testing yang memeriksa aliran data dalam program, mulai dari data didefinisikan, digunakan, diubah, sampai menghasilkan output. Pada fitur bahan baku LocalesPro, data utama yang diuji adalah item transaksi, resep produk, stok bahan, dan mutasi stok.
 
-## 2. Tujuan Pengujian
+## 2. Tujuan Dokumen
+
+1. Menjelaskan aliran data dari POS sampai stok bahan berubah.
+2. Mengidentifikasi variabel yang didefinisikan, digunakan, dan diperbarui.
+3. Memastikan nilai stok akhir berasal dari perhitungan yang benar.
+4. Menjelaskan hubungan antara data transaksi, resep, dan mutasi stok.
+
+## 3. Ruang Lingkup
+
+Data flow testing dibatasi pada data yang berhubungan dengan transaksi POS dan bahan baku, yaitu item transaksi, qty produk, resep produk, kebutuhan bahan, stok tersedia, stok akhir, dan data mutasi stok.
+
+## 4. Definisi Metode
+
+Data Flow Testing adalah pengujian yang memeriksa bagaimana data bergerak di dalam program. Fokus utamanya adalah kapan variabel dibuat, kapan digunakan, kapan diubah, dan apakah data tersebut menghasilkan output yang benar.
+
+## 5. Prosedur Penerapan
+
+1. Menentukan variabel utama pada transaksi bahan baku.
+2. Menelusuri titik definisi data dari input request.
+3. Menelusuri penggunaan data pada validasi, perhitungan, dan query database.
+4. Menelusuri perubahan data stok.
+5. Memastikan output akhir sesuai perhitungan.
+
+## 6. Tujuan Pengujian
 
 1. Melacak aliran data dari input POS sampai stok bahan berubah.
 2. Memastikan variabel penting didefinisikan dan digunakan dengan benar.
 3. Memastikan data resep produk digunakan untuk menghitung kebutuhan bahan.
 4. Memastikan stok akhir dan mutasi stok menggunakan nilai yang sesuai.
 
-## 3. Variabel dan Data Penting
+## 7. Variabel dan Data Penting
 
 | Variabel / Data | Lokasi | Fungsi |
 | --- | --- | --- |
@@ -28,7 +51,7 @@ Data Flow Testing adalah metode white box testing yang memeriksa aliran data dal
 | `$delta` | `payment_helpers.php` | Nilai perubahan stok, negatif untuk penjualan dan positif untuk restore |
 | `$stockAfter` | `payment_helpers.php` | Stok akhir setelah perubahan |
 
-## 4. Source Code Aliran Data
+## 8. Source Code Aliran Data
 
 ### 4.1 Input POS menjadi normalized items
 
@@ -82,7 +105,7 @@ $stockAfter = round($stockBefore + $delta, 2);
 
 Pada mode `deduct`, `$direction = -1`, sehingga stok berkurang. Pada mode `restore`, `$direction = 1`, sehingga stok bertambah kembali.
 
-## 5. Alur Data Utama
+## 9. Alur Data Utama
 
 | Tahap | Data Masuk | Proses | Data Keluar |
 | --- | --- | --- | --- |
@@ -97,7 +120,7 @@ Pada mode `deduct`, `$direction = -1`, sehingga stok berkurang. Pada mode `resto
 | 9 | Usage bahan | Hitung delta stok | `$stockAfter` |
 | 10 | Data mutasi | Simpan `stock_movements` | Riwayat stok |
 
-## 6. Data Flow Test Case
+## 10. Data Flow Test Case
 
 | ID | Definisi Data | Penggunaan Data | Expected Result |
 | --- | --- | --- | --- |
@@ -108,7 +131,28 @@ Pada mode `deduct`, `$direction = -1`, sehingga stok berkurang. Pada mode `resto
 | DF-05 | `$direction = -1`, `$totalUsage = 300` | Hitung delta | `$delta = -300`, stok berkurang |
 | DF-06 | `$direction = 1`, `$totalUsage = 300` | Void transaksi | `$delta = 300`, stok dikembalikan |
 
-## 7. Panduan Screenshot Manual
+## 11. Def-Use Chain Variabel Utama
+
+| Variabel | Definition | Use | Output / Dampak |
+| --- | --- | --- | --- |
+| `$quantity` | Diambil dari `$item->qty` | Subtotal dan kebutuhan bahan | Menentukan total harga dan total bahan terpakai |
+| `$totalPrice` | Akumulasi subtotal item | Validasi total dan pembayaran | Menentukan transaksi valid/tidak valid |
+| `$amountPaid` | Diambil dari request pembayaran | Validasi cash | Menentukan transaksi boleh diproses atau ditolak |
+| `$recipeRows` | Hasil query resep produk | Loop bahan resep | Menentukan bahan yang harus dihitung |
+| `$required` | Akumulasi kebutuhan bahan | Dibandingkan dengan `$available` | Menentukan stok cukup atau kurang |
+| `$delta` | `direction * totalUsage` | Update stok bahan | Menentukan stok berkurang atau bertambah |
+| `$stockAfter` | `stockBefore + delta` | Mutasi stok | Menjadi nilai akhir pada riwayat stok |
+
+## 12. Risiko Data Flow
+
+| Risiko | Penyebab | Dampak | Pencegahan dalam Kode |
+| --- | --- | --- | --- |
+| Qty tidak valid | Input qty 0 atau negatif | Perhitungan stok salah | Validasi `quantity <= 0` |
+| Resep tidak valid | `quantity_needed <= 0` | Kebutuhan bahan tidak masuk akal | Validasi resep pada helper |
+| Stok kurang | `required > available` | Stok bisa negatif jika dipaksa | Throw exception sebelum commit |
+| Mutasi tidak lengkap | Ingredient/branch/quantity invalid | Audit stok tidak tercatat | Guard clause pada `recordStockMovement()` |
+
+## 13. Panduan Screenshot Manual
 
 | No | Screenshot | Tujuan Bukti |
 | --- | --- | --- |
@@ -128,6 +172,6 @@ screenshot-dataflow-04-delta-stockafter.png
 screenshot-dataflow-05-output-stok.png
 ```
 
-## 8. Kesimpulan
+## 14. Kesimpulan
 
 Data flow testing menunjukkan bahwa data transaksi mengalir dari input POS ke validasi produk, validasi stok, penyimpanan transaksi, pengurangan stok, dan pencatatan mutasi. Variabel utama seperti `$quantity`, `$required`, `$available`, `$delta`, dan `$stockAfter` menjadi titik penting yang harus benar agar stok bahan baku tetap akurat.
