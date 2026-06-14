@@ -62,6 +62,30 @@ Hasil pengujian cause-effect dicatat dengan memperhatikan apakah akibat yang mun
 
 Jika suatu cause menghasilkan effect yang tidak sesuai, misalnya transaksi gagal tetapi stok tetap berkurang, maka temuan tersebut termasuk masalah serius karena berdampak pada integritas stok. Temuan seperti ini perlu diprioritaskan saat masuk ke tahap white box testing.
 
+## Keterkaitan dengan Aplikasi
+
+| Cause | Bagian Aplikasi | Effect yang Dicek |
+| --- | --- | --- |
+| Produk dibuat dengan resep valid | Menu & Resep | Produk siap dijual dan memiliki komposisi bahan |
+| Produk dijual dengan stok cukup | POS | Transaksi berhasil dan stok berkurang |
+| Produk dijual dengan stok kurang | POS dan Stok | Transaksi ditolak dan stok tetap |
+| Pembayaran kurang | Modal Pembayaran POS | Transaksi ditolak sebelum stok berubah |
+| Transaksi paid di-void | Laporan Transaksi dan Stok | Status menjadi void dan stok dikembalikan |
+| Keranjang kosong diproses | POS | Transaksi ditolak |
+
+## Tabel Eksekusi Pengujian
+
+Tabel ini digunakan untuk membuktikan bahwa setiap cause menghasilkan effect yang tepat pada aplikasi.
+
+| ID | Cause | Langkah Uji | Expected Effect | Actual Effect | Status | Bukti / Catatan |
+| --- | --- | --- | --- | --- | --- | --- |
+| CE-01 | Produk aktif, resep valid, stok cukup, pembayaran cukup | Jual Kopisusu qty 3 dan bayar 50000 | Transaksi paid, stok berkurang, mutasi keluar tercatat | Belum diuji | Not Run | Screenshot laporan dan stok |
+| CE-03 | Stok bahan kurang | Atur Sedotan 2 pcs lalu jual kebutuhan 3 pcs | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Screenshot pesan stok kurang |
+| CE-04 | Pembayaran kurang | Total 30000, bayar 20000 | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Screenshot modal pembayaran |
+| CE-07 | Transaksi paid di-void | Void transaksi Kopisusu qty 3 dengan alasan valid | Status void, stok bahan kembali sesuai pemakaian | Belum diuji | Not Run | Screenshot laporan dan mutasi |
+| CE-08 | Keranjang kosong | Klik proses pembayaran tanpa item | Transaksi ditolak dan tidak ada stok berubah | Belum diuji | Not Run | Screenshot POS |
+| CE-10 | Dua produk memakai bahan sama | Jual dua produk yang sama-sama memakai Keju | Stok Keju berkurang sesuai total akumulasi | Belum diuji | Not Run | Screenshot stok Keju |
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

@@ -62,6 +62,30 @@ Saat test case dijalankan, hasil aktual perlu dicatat agar dokumen dapat menjadi
 
 Dokumen ini berisi expected behavior. Jika saat pengujian ditemukan sistem masih menerima data yang seharusnya ditolak, hasil tersebut tetap dicatat sebagai temuan. Temuan tersebut dapat dipakai sebagai bahan pembahasan pada white box testing atau rekomendasi perbaikan validasi.
 
+## Keterkaitan dengan Aplikasi
+
+| Aktivitas Pengujian | Bagian Aplikasi | Output yang Diverifikasi |
+| --- | --- | --- |
+| Menambahkan bahan baku | Halaman Bahan Baku | Data bahan muncul dengan nama, stok, satuan, dan batas minimum |
+| Membuat produk dengan resep | Halaman Menu & Resep | Produk tersimpan dan daftar resep dapat dilihat |
+| Menjual produk | Halaman POS | Transaksi berhasil jika input valid dan stok cukup |
+| Mengecek pengurangan stok | Halaman Stok | Stok bahan berkurang sesuai resep produk |
+| Mengecek audit stok | Riwayat Mutasi Stok | Mutasi stok keluar karena penjualan tercatat |
+| Mengecek transaksi gagal | POS dan Stok | Transaksi ditolak dan stok tetap |
+
+## Tabel Eksekusi Pengujian
+
+Tabel berikut digunakan saat pengujian benar-benar dijalankan. Kolom `Actual Result`, `Status`, dan `Bukti / Catatan` diisi setelah tester melakukan pengujian pada aplikasi.
+
+| ID | Langkah Uji | Data Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
+| --- | --- | --- | --- | --- | --- | --- |
+| EP-01 | Login sebagai admin, buka Bahan Baku, tambah bahan valid | Keju, 1000 gr, min 100 | Bahan berhasil tersimpan | Belum diuji | Not Run | Screenshot daftar bahan |
+| EP-03 | Buka Menu & Resep, tambah produk dengan resep valid | Kopisusu, harga 10000, resep Keju 100 gr | Produk dan resep berhasil tersimpan | Belum diuji | Not Run | Screenshot detail resep |
+| EP-04 | Tambah produk tanpa memasukkan resep | Kopisusu tanpa resep | Sistem menolak produk | Belum diuji | Not Run | Pesan validasi resep wajib |
+| EP-06 | Login sebagai kasir, jual Kopisusu qty 3 dengan stok cukup | Kopisusu qty 3, bayar 50000 | Transaksi paid, stok bahan berkurang sesuai resep | Belum diuji | Not Run | Screenshot POS, stok akhir, mutasi |
+| EP-07 | Jual produk dengan qty melebihi stok bahan | Kopisusu qty 11, Sedotan 10 pcs | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Screenshot pesan stok kurang |
+| EP-10 | Proses pembayaran tunai kurang dari total | Total 30000, bayar 20000 | Transaksi ditolak dan stok tidak berubah | Belum diuji | Not Run | Screenshot pesan uang kurang |
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

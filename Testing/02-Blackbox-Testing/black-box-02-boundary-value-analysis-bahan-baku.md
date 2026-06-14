@@ -62,6 +62,30 @@ Hasil pengujian nilai batas dicatat menggunakan kolom tambahan berikut ketika te
 
 Boundary Value Analysis pada dokumen ini menggambarkan perilaku yang diharapkan. Jika aplikasi menerima nilai yang seharusnya berada di bawah batas valid, maka hasil tersebut dicatat sebagai Fail dan menjadi catatan perbaikan validasi.
 
+## Keterkaitan dengan Aplikasi
+
+| Nilai Batas | Bagian Aplikasi | Output yang Diverifikasi |
+| --- | --- | --- |
+| Resep 0 bahan dan 1 bahan | Halaman Menu & Resep | Produk ditolak jika tanpa resep dan diterima jika minimal 1 bahan |
+| Qty 0, 1, dan 2 | Halaman POS | Qty tidak valid ditolak, qty valid dapat diproses |
+| Stok kurang, sama, dan lebih dari kebutuhan | POS dan Stok | Transaksi ditolak saat stok kurang dan berhasil saat stok cukup |
+| Pembayaran kurang, sama, dan lebih dari total | Modal Pembayaran POS | Pembayaran kurang ditolak, pembayaran cukup berhasil |
+| Alasan void kurang dan cukup karakter | Laporan Transaksi | Void hanya diproses jika alasan memenuhi batas minimal |
+
+## Tabel Eksekusi Pengujian
+
+Tabel ini disiapkan untuk mencatat hasil aktual saat pengujian nilai batas dijalankan pada aplikasi.
+
+| ID | Langkah Uji | Data Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
+| --- | --- | --- | --- | --- | --- | --- |
+| BVA-01 | Tambah produk tanpa resep | Resep 0 bahan | Produk ditolak | Belum diuji | Not Run | Pesan resep wajib |
+| BVA-02 | Tambah produk dengan 1 bahan resep | Resep Keju 100 gr | Produk diterima | Belum diuji | Not Run | Screenshot detail resep |
+| BVA-06 | Kirim transaksi dengan qty 0 | Kopisusu qty 0 | Transaksi ditolak | Belum diuji | Not Run | Pesan item tidak valid |
+| BVA-09 | Jual produk saat stok kurang 1 dari kebutuhan | Sedotan 2 pcs, kebutuhan 3 pcs | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Stok sebelum dan sesudah |
+| BVA-10 | Jual produk saat stok sama dengan kebutuhan | Sedotan 3 pcs, kebutuhan 3 pcs | Transaksi berhasil dan stok menjadi 0 | Belum diuji | Not Run | Screenshot stok akhir |
+| BVA-12 | Bayar kurang 1 rupiah dari total | Total 30000, bayar 29999 | Transaksi ditolak | Belum diuji | Not Run | Pesan uang kurang |
+| BVA-13 | Bayar sama dengan total | Total 30000, bayar 30000 | Transaksi berhasil, kembalian 0 | Belum diuji | Not Run | Screenshot transaksi paid |
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

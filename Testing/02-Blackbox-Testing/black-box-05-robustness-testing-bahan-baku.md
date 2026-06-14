@@ -61,6 +61,31 @@ Karena Robustness Testing berfokus pada ketahanan sistem, hasil pengujian perlu 
 
 Beberapa skenario robustness bersifat expected requirement. Jika implementasi saat ini masih menerima input yang kurang aman, misalnya stok negatif atau harga nol, maka hasil tersebut bukan berarti dokumen salah. Hasil tersebut dicatat sebagai temuan validasi dan dapat dijadikan rekomendasi perbaikan sistem.
 
+## Keterkaitan dengan Aplikasi
+
+| Kondisi Tidak Normal | Bagian Aplikasi | Risiko yang Diverifikasi |
+| --- | --- | --- |
+| Stok negatif atau satuan kosong | Bahan Baku | Data stok tidak boleh rusak sejak awal input bahan |
+| Harga nol atau resep kosong | Menu & Resep | Produk tidak valid tidak boleh menjadi produk jual normal |
+| Qty sangat besar | POS | Stok tidak boleh menjadi negatif karena pembelian melebihi bahan tersedia |
+| Uang tunai kurang | POS | Transaksi gagal tidak boleh mengurangi stok |
+| Produk lintas cabang | POS, Bahan, Produk | Data cabang tidak boleh tercampur |
+| Void berulang | Laporan Transaksi | Stok tidak boleh dikembalikan lebih dari satu kali |
+| Klik pembayaran berulang | POS | Sistem tidak boleh membuat transaksi dan mutasi stok ganda |
+
+## Tabel Eksekusi Pengujian
+
+Tabel berikut dipakai untuk mencatat respons aplikasi terhadap input tidak normal dan memastikan data stok tetap aman.
+
+| ID | Langkah Uji | Data Tidak Normal | Expected Result | Actual Result | Status | Bukti / Catatan |
+| --- | --- | --- | --- | --- | --- | --- |
+| RB-02 | Tambah bahan dengan stok negatif | Keju, stok -100, gr | Sistem menolak input atau dicatat sebagai temuan validasi jika diterima | Belum diuji | Not Run | Screenshot form / daftar bahan |
+| RB-04 | Tambah produk harga nol dengan resep valid | Kopisusu, harga 0 | Sistem menolak harga nol atau dicatat sebagai temuan validasi | Belum diuji | Not Run | Screenshot pesan / produk tersimpan |
+| RB-10 | Jual produk qty sangat besar | Kopisusu qty 9999 | Transaksi ditolak, stok tidak negatif | Belum diuji | Not Run | Screenshot pesan stok kurang |
+| RB-13 | Bayar kurang dari total | Total 30000, bayar 20000 | Transaksi ditolak, stok tetap | Belum diuji | Not Run | Screenshot modal pembayaran |
+| RB-17 | Void transaksi yang sudah void | Transaksi Voided di-void ulang | Sistem menolak void ulang dan stok tidak bertambah lagi | Belum diuji | Not Run | Screenshot laporan / stok |
+| RB-18 | Klik konfirmasi pembayaran berulang | Klik cepat beberapa kali | Hanya satu transaksi dibuat dan stok hanya berkurang sekali | Belum diuji | Not Run | Jumlah transaksi dan mutasi stok |
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

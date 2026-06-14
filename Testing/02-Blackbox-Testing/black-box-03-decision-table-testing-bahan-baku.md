@@ -62,6 +62,31 @@ Setiap rule pada decision table sebaiknya dicatat sebagai hasil eksekusi penguji
 
 Decision table ini dibuat berdasarkan aturan bisnis yang diharapkan dari aplikasi. Untuk produk tanpa resep, skenario utama yang diuji adalah pembuatan produk ditolak. Jika terdapat data lama yang tidak memiliki resep, hasil pengujian pada POS perlu dicatat sebagai temuan khusus karena dapat mempengaruhi akurasi stok.
 
+## Keterkaitan dengan Aplikasi
+
+| Kondisi Decision Table | Bagian Aplikasi | Output yang Diverifikasi |
+| --- | --- | --- |
+| Produk aktif/nonaktif | Halaman Menu & Resep dan POS | Produk aktif dapat dijual, produk nonaktif tidak menjadi transaksi valid |
+| Produk memiliki resep | Halaman Menu & Resep | Produk baru wajib memiliki minimal 1 bahan resep |
+| Qty valid | Halaman POS | Qty lebih dari 0 dapat diproses, qty 0 ditolak |
+| Stok cukup/tidak cukup | POS dan Stok | Transaksi bergantung pada ketersediaan semua bahan resep |
+| Cabang sesuai/tidak sesuai | Cabang aktif, Produk, Bahan | Data lintas cabang tidak boleh diproses sebagai transaksi valid |
+| Pembayaran cukup/tidak cukup | Modal Pembayaran POS | Uang tunai kurang menyebabkan transaksi ditolak |
+
+## Tabel Eksekusi Pengujian
+
+Setiap rule pada decision table perlu dieksekusi untuk membuktikan keputusan sistem sesuai dengan kombinasi kondisi.
+
+| ID | Rule | Langkah Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
+| --- | --- | --- | --- | --- | --- | --- |
+| DT-01 | R1 | Jual produk aktif dengan resep valid, qty valid, stok cukup, uang cukup | Transaksi berhasil, stok berkurang, mutasi tercatat | Belum diuji | Not Run | Screenshot transaksi dan stok |
+| DT-02 | R2 | Ubah produk menjadi nonaktif lalu coba jual di POS | Transaksi tidak boleh berhasil dan stok tetap | Belum diuji | Not Run | Screenshot status produk / POS |
+| DT-03 | R3 | Coba simpan produk tanpa resep | Produk ditolak karena resep wajib | Belum diuji | Not Run | Pesan validasi resep |
+| DT-04 | R4 | Kirim transaksi dengan qty 0 | Transaksi ditolak | Belum diuji | Not Run | Pesan item tidak valid |
+| DT-05 | R5 | Jual produk dengan salah satu stok bahan kurang | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Pesan stok kurang |
+| DT-06 | R6 | Proses produk atau bahan dari cabang berbeda | Transaksi ditolak dan stok tidak berubah | Belum diuji | Not Run | Pesan cabang tidak sesuai |
+| DT-07 | R7 | Proses pembayaran tunai kurang | Transaksi ditolak dan stok tetap | Belum diuji | Not Run | Pesan uang kurang |
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |
