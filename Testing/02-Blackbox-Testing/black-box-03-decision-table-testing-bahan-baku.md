@@ -77,6 +77,8 @@ Decision table ini dibuat berdasarkan aturan bisnis yang diharapkan dari aplikas
 
 Setiap rule pada decision table perlu dieksekusi untuk membuktikan keputusan sistem sesuai dengan kombinasi kondisi.
 
+Test case prioritas untuk waktu terbatas adalah `DT-01`, `DT-03`, `DT-05`, dan `DT-07` karena sudah mewakili jalur transaksi berhasil, resep tidak valid, stok kurang, dan pembayaran kurang.
+
 | ID | Rule | Langkah Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
 | --- | --- | --- | --- | --- | --- | --- |
 | DT-01 | R1 | Jual produk aktif dengan resep valid, qty valid, stok cukup, uang cukup | Transaksi berhasil, stok berkurang, mutasi tercatat | Belum diuji | Not Run | Screenshot transaksi dan stok |

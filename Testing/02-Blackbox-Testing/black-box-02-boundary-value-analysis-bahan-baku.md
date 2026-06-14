@@ -76,6 +76,8 @@ Boundary Value Analysis pada dokumen ini menggambarkan perilaku yang diharapkan.
 
 Tabel ini disiapkan untuk mencatat hasil aktual saat pengujian nilai batas dijalankan pada aplikasi.
 
+Test case prioritas untuk waktu terbatas adalah `BVA-01`, `BVA-02`, `BVA-09`, `BVA-10`, `BVA-12`, dan `BVA-13` karena mencakup batas resep, batas stok, dan batas pembayaran tunai.
+
 | ID | Langkah Uji | Data Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
 | --- | --- | --- | --- | --- | --- | --- |
 | BVA-01 | Tambah produk tanpa resep | Resep 0 bahan | Produk ditolak | Belum diuji | Not Run | Pesan resep wajib |
