@@ -36,6 +36,31 @@ Pada fitur bahan baku LocalesPro, metode ini digunakan untuk menguji kondisi sep
 6. Memastikan tidak ada transaksi ganda, mutasi ganda, atau stok negatif.
 7. Mencatat hasil pengujian berdasarkan expected result.
 
+## Kondisi Awal Pengujian
+
+| Kondisi | Keterangan |
+| --- | --- |
+| Akun admin | Dapat mengakses form bahan baku, form produk, resep, dan laporan transaksi |
+| Akun kasir | Dapat mengakses POS dan stok cabang aktif |
+| Data normal | Bahan dan produk valid sudah tersedia sebagai pembanding |
+| Data tidak normal | Input kosong, negatif, terlalu besar, atau tidak sesuai cabang disiapkan untuk pengujian |
+| Verifikasi utama | Stok tidak boleh rusak, negatif, atau berubah saat transaksi gagal |
+| Verifikasi tambahan | Tidak boleh ada transaksi ganda atau mutasi stok ganda akibat aksi berulang |
+
+## Format Pencatatan Hasil
+
+Karena Robustness Testing berfokus pada ketahanan sistem, hasil pengujian perlu mencatat respons sistem secara jelas.
+
+| Kolom | Keterangan |
+| --- | --- |
+| Actual Result | Respons aktual sistem terhadap input tidak normal |
+| Status | `Pass` jika sistem tetap stabil dan data stok aman |
+| Bukti / Catatan | Pesan error, nilai stok akhir, transaksi yang terbentuk, atau mutasi stok |
+
+## Catatan Kesesuaian Implementasi
+
+Beberapa skenario robustness bersifat expected requirement. Jika implementasi saat ini masih menerima input yang kurang aman, misalnya stok negatif atau harga nol, maka hasil tersebut bukan berarti dokumen salah. Hasil tersebut dicatat sebagai temuan validasi dan dapat dijadikan rekomendasi perbaikan sistem.
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |
@@ -77,12 +102,12 @@ Fokus pengujian adalah memastikan sistem tetap menolak input bermasalah, tidak m
 | ID | Area | Skenario Tidak Normal | Input Uji | Expected Result |
 | --- | --- | --- | --- | --- |
 | RB-01 | Bahan baku | Nama bahan kosong | Nama kosong, stok `1000`, satuan `gr` | Sistem menolak input, bahan tidak tersimpan |
-| RB-02 | Bahan baku | Stok awal negatif | Nama `Keju`, stok `-100`, satuan `gr` | Sistem menolak atau tidak boleh menghasilkan stok negatif |
-| RB-03 | Bahan baku | Satuan kosong | Nama `Sirup`, stok `1000`, satuan kosong | Sistem menolak input atau meminta satuan diisi |
-| RB-04 | Produk | Harga produk nol | Produk `Kopisusu`, harga `0`, resep valid | Sistem menolak atau transaksi tidak dapat menghasilkan total nol |
+| RB-02 | Bahan baku | Stok awal negatif | Nama `Keju`, stok `-100`, satuan `gr` | Sistem seharusnya menolak input agar stok bahan tidak bernilai negatif |
+| RB-03 | Bahan baku | Satuan kosong | Nama `Sirup`, stok `1000`, satuan kosong | Sistem seharusnya menolak input karena satuan wajib ada untuk perhitungan stok |
+| RB-04 | Produk | Harga produk nol | Produk `Kopisusu`, harga `0`, resep valid | Sistem seharusnya menolak harga nol agar transaksi tidak menghasilkan total tidak valid |
 | RB-05 | Produk | Produk dibuat tanpa resep | Produk valid, resep kosong | Sistem menolak produk karena resep wajib diisi |
 | RB-06 | Resep | Jumlah bahan negatif | Keju `-100 gr` | Sistem menolak resep tidak valid |
-| RB-07 | Resep | Bahan resep tidak dipilih | Amount `100`, ingredient kosong | Sistem menolak atau meminta bahan dipilih |
+| RB-07 | Resep | Bahan resep tidak dipilih | Amount `100`, ingredient kosong | Sistem menolak penyimpanan resep dan meminta bahan dipilih |
 | RB-08 | POS | Keranjang kosong dibayar | Tidak ada item | Sistem menolak transaksi kosong |
 | RB-09 | POS | Qty produk nol | Kopisusu qty `0` | Sistem menolak transaksi |
 | RB-10 | POS | Qty sangat besar melebihi stok | Kopisusu qty `9999` | Sistem menolak karena stok bahan tidak cukup |
@@ -92,7 +117,7 @@ Fokus pengujian adalah memastikan sistem tetap menolak input bermasalah, tidak m
 | RB-14 | Pembayaran | Uang tunai sangat besar | Total Rp 30.000, bayar Rp 1.000.000 | Transaksi berhasil, kembalian dihitung benar |
 | RB-15 | Cabang | Produk dari cabang berbeda dijual | Produk cabang A, user cabang B | Transaksi ditolak, stok tidak berubah |
 | RB-16 | Void | Void transaksi dengan ID tidak valid | ID transaksi `0` | Sistem menolak ID transaksi tidak valid |
-| RB-17 | Void | Void transaksi yang sudah void | Transaksi status `Voided` di-void lagi | Sistem menolak atau memberi pesan transaksi sudah void |
+| RB-17 | Void | Void transaksi yang sudah void | Transaksi status `Voided` di-void lagi | Sistem menolak proses void ulang dan menampilkan pesan transaksi sudah void |
 | RB-18 | Aksi berulang | Tombol konfirmasi pembayaran ditekan berulang | Klik konfirmasi beberapa kali saat proses berjalan | Sistem hanya membuat satu transaksi dan stok hanya berkurang satu kali |
 
 ## 6. Contoh Verifikasi Robustness pada Stok

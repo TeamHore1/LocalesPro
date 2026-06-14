@@ -36,6 +36,32 @@ Pada fitur bahan baku LocalesPro, metode ini digunakan untuk memastikan transaks
 6. Memverifikasi status transaksi, stok akhir, dan mutasi stok.
 7. Membandingkan hasil aktual dengan expected action pada tabel keputusan.
 
+## Kondisi Awal Pengujian
+
+| Kondisi | Keterangan |
+| --- | --- |
+| Akun admin | Dapat mengatur status produk aktif/nonaktif dan resep produk |
+| Akun kasir | Dapat memproses transaksi POS pada cabang aktif |
+| Cabang aktif | Cabang bahan, produk, dan transaksi harus sama untuk skenario valid |
+| Produk valid | Kopisusu berstatus aktif dan memiliki resep lengkap |
+| Produk tidak valid | Produk nonaktif, produk tanpa resep, atau produk dari cabang berbeda |
+| Stok valid | Semua bahan resep tersedia minimal sama dengan kebutuhan transaksi |
+| Stok tidak valid | Minimal satu bahan lebih kecil dari kebutuhan transaksi |
+
+## Format Pencatatan Hasil
+
+Setiap rule pada decision table sebaiknya dicatat sebagai hasil eksekusi pengujian dengan format berikut:
+
+| Kolom | Keterangan |
+| --- | --- |
+| Actual Result | Keputusan aktual sistem, misalnya transaksi berhasil atau ditolak |
+| Status | `Pass` jika keputusan aktual sesuai expected action |
+| Bukti / Catatan | Status transaksi, stok akhir, pesan error, atau riwayat mutasi stok |
+
+## Catatan Kesesuaian Implementasi
+
+Decision table ini dibuat berdasarkan aturan bisnis yang diharapkan dari aplikasi. Untuk produk tanpa resep, skenario utama yang diuji adalah pembuatan produk ditolak. Jika terdapat data lama yang tidak memiliki resep, hasil pengujian pada POS perlu dicatat sebagai temuan khusus karena dapat mempengaruhi akurasi stok.
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |
@@ -90,7 +116,7 @@ Decision Table Testing digunakan untuk menguji kombinasi kondisi yang menghasilk
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | R1 | Ya | Ya | Ya | Ya | Ya | Ya | A1, A2, A3 |
 | R2 | Tidak | Ya | Ya | Ya | Ya | Ya | A4, A5 |
-| R3 | Ya | Tidak | Ya | Ya | Ya | Ya | A4, A5 untuk pembuatan produk; jika data lama tanpa resep dijual, stok tidak berkurang |
+| R3 | Ya | Tidak | Ya | Ya | Ya | Ya | A4, A5 pada proses pembuatan produk karena produk baru wajib memiliki resep |
 | R4 | Ya | Ya | Tidak | Ya | Ya | Ya | A4, A5 |
 | R5 | Ya | Ya | Ya | Tidak | Ya | Ya | A4, A5 |
 | R6 | Ya | Ya | Ya | Ya | Tidak | Ya | A4, A5 |
@@ -103,7 +129,7 @@ Decision Table Testing digunakan untuk menguji kombinasi kondisi yang menghasilk
 | --- | --- | --- | --- | --- |
 | DT-01 | R1 | Transaksi valid dengan stok cukup | Kopisusu aktif, resep lengkap, qty `3`, uang Rp 50.000 | Transaksi berhasil, stok Sedotan berkurang `3`, Keju `300`, Sirup `30` |
 | DT-02 | R2 | Produk nonaktif dicoba dijual | Produk status `inactive`, qty `1`, stok cukup, uang cukup | Transaksi ditolak, stok bahan tidak berubah |
-| DT-03 | R3 | Admin membuat produk tanpa resep | Produk valid tetapi resep kosong | Produk ditolak karena resep wajib diisi |
+| DT-03 | R3 | Admin membuat produk tanpa resep | Produk valid tetapi resep kosong | Produk ditolak karena resep wajib diisi, sehingga produk tidak dapat menjadi item POS valid |
 | DT-04 | R4 | Qty transaksi tidak valid | Produk aktif, qty `0`, stok cukup, uang cukup | Transaksi ditolak karena item transaksi tidak valid |
 | DT-05 | R5 | Salah satu bahan stok kurang | Sedotan tersedia `2 pcs`, kebutuhan `3 pcs` | Transaksi ditolak karena stok tidak cukup |
 | DT-06 | R6 | Produk atau bahan berasal dari cabang berbeda | Produk cabang A diproses pada cabang B | Transaksi ditolak karena cabang tidak sesuai |

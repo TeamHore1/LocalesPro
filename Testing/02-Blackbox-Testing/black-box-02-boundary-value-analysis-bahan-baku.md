@@ -36,6 +36,32 @@ Pada fitur bahan baku LocalesPro, metode ini diterapkan untuk menguji batas sepe
 6. Memverifikasi stok akhir setelah transaksi berhasil atau gagal.
 7. Mencatat hasil pengujian dan membandingkannya dengan expected result.
 
+## Kondisi Awal Pengujian
+
+| Kondisi | Keterangan |
+| --- | --- |
+| Akun admin | Dapat membuat bahan baku dan produk dengan resep |
+| Akun kasir | Dapat melakukan transaksi POS tunai |
+| Cabang aktif | Cabang yang digunakan untuk bahan, produk, dan transaksi sama |
+| Produk utama | Kopisusu dengan harga Rp 10.000 |
+| Resep utama | Sedotan 1 pcs, Keju 100 gr, Sirup Gula Aren 10 ml per porsi |
+| Stok awal normal | Sedotan 10 pcs, Keju 1.000 gr, Sirup Gula Aren 1.500 ml |
+| Verifikasi hasil | Dilakukan melalui halaman Stok, Mutasi Stok, dan Laporan Transaksi |
+
+## Format Pencatatan Hasil
+
+Hasil pengujian nilai batas dicatat menggunakan kolom tambahan berikut ketika test case dijalankan:
+
+| Kolom | Keterangan |
+| --- | --- |
+| Actual Result | Hasil aktual pada aplikasi setelah input nilai batas diuji |
+| Status | `Pass`, `Fail`, `Blocked`, atau `Not Run` |
+| Bukti / Catatan | Nilai stok sebelum dan sesudah, pesan validasi, atau screenshot hasil |
+
+## Catatan Kesesuaian Implementasi
+
+Boundary Value Analysis pada dokumen ini menggambarkan perilaku yang diharapkan. Jika aplikasi menerima nilai yang seharusnya berada di bawah batas valid, maka hasil tersebut dicatat sebagai Fail dan menjadi catatan perbaikan validasi.
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

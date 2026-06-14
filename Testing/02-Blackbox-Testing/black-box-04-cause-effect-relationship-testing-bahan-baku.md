@@ -36,6 +36,32 @@ Pada fitur bahan baku LocalesPro, contoh cause adalah produk dijual dengan stok 
 6. Memverifikasi apakah effect yang muncul sesuai dengan cause yang diuji.
 7. Memastikan stok bahan baku berubah hanya pada cause yang memang menghasilkan transaksi berhasil atau void transaksi.
 
+## Kondisi Awal Pengujian
+
+| Kondisi | Keterangan |
+| --- | --- |
+| Akun admin | Dapat membuat bahan, produk, resep, dan melakukan void transaksi melalui laporan |
+| Akun kasir | Dapat melakukan transaksi POS |
+| Produk utama | Kopisusu aktif dengan resep valid |
+| Resep utama | Sedotan 1 pcs, Keju 100 gr, Sirup Gula Aren 10 ml |
+| Transaksi valid | Kopisusu qty 3 dengan pembayaran tunai cukup |
+| Transaksi void | Transaksi valid yang sudah berstatus Paid kemudian dibatalkan |
+| Verifikasi efek | Dilakukan melalui stok akhir, mutasi stok, dan status transaksi |
+
+## Format Pencatatan Hasil
+
+Hasil pengujian cause-effect dicatat dengan memperhatikan apakah akibat yang muncul benar-benar sesuai dengan penyebab yang diberikan.
+
+| Kolom | Keterangan |
+| --- | --- |
+| Actual Effect | Efek aktual yang muncul pada sistem |
+| Status | `Pass` jika actual effect sama dengan expected effect |
+| Bukti / Catatan | Perubahan stok, status transaksi, pesan error, atau mutasi stok |
+
+## Catatan Kesesuaian Implementasi
+
+Jika suatu cause menghasilkan effect yang tidak sesuai, misalnya transaksi gagal tetapi stok tetap berkurang, maka temuan tersebut termasuk masalah serius karena berdampak pada integritas stok. Temuan seperti ini perlu diprioritaskan saat masuk ke tahap white box testing.
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |

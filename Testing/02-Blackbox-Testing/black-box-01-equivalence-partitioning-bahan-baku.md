@@ -36,6 +36,32 @@ Pada fitur bahan baku LocalesPro, metode ini digunakan untuk mengelompokkan inpu
 6. Membandingkan hasil aktual dengan expected result pada tabel test case.
 7. Memastikan stok bahan hanya berkurang pada transaksi yang berhasil.
 
+## Kondisi Awal Pengujian
+
+| Kondisi | Keterangan |
+| --- | --- |
+| Akun admin | Sudah tersedia dan dapat mengakses menu Bahan Baku serta Menu & Resep |
+| Akun kasir | Sudah tersedia dan dapat mengakses halaman POS |
+| Cabang aktif | Cabang pengujian sudah aktif dan dipilih oleh user |
+| Data bahan baku | Sedotan, Keju, dan Sirup Gula Aren tersedia pada cabang aktif |
+| Data produk | Produk Kopisusu digunakan sebagai produk utama pengujian |
+| Metode pembayaran | Cash / Tunai |
+| Halaman verifikasi | Stok dan Riwayat Mutasi Stok digunakan untuk mengecek perubahan stok |
+
+## Format Pencatatan Hasil
+
+Saat test case dijalankan, hasil aktual perlu dicatat agar dokumen dapat menjadi laporan eksekusi pengujian, bukan hanya rancangan. Format pencatatan yang digunakan adalah:
+
+| Kolom | Keterangan |
+| --- | --- |
+| Actual Result | Hasil nyata yang muncul setelah pengujian dilakukan |
+| Status | `Pass` jika sesuai expected result, `Fail` jika tidak sesuai, `Blocked` jika belum dapat diuji |
+| Bukti / Catatan | Screenshot, catatan halaman, pesan error, atau nilai stok akhir |
+
+## Catatan Kesesuaian Implementasi
+
+Dokumen ini berisi expected behavior. Jika saat pengujian ditemukan sistem masih menerima data yang seharusnya ditolak, hasil tersebut tetap dicatat sebagai temuan. Temuan tersebut dapat dipakai sebagai bahan pembahasan pada white box testing atau rekomendasi perbaikan validasi.
+
 ## 1. Identitas Pengujian
 
 | Komponen | Keterangan |
@@ -107,7 +133,7 @@ Equivalence Partitioning digunakan karena fitur bahan baku memiliki banyak input
 | EP-09 | Valid | Kasir membayar tunai sesuai total | Total Rp 30.000, uang diterima Rp 30.000 | Transaksi berhasil, kembalian Rp 0 |
 | EP-10 | Tidak valid | Kasir membayar tunai kurang dari total | Total Rp 30.000, uang diterima Rp 20.000 | Transaksi ditolak, stok bahan tidak berkurang |
 | EP-11 | Valid | Dua produk memakai bahan yang sama | Produk A dan Produk B sama-sama memakai Keju | Sistem mengakumulasi kebutuhan Keju dan mengurangi stok sesuai total pemakaian |
-| EP-12 | Tidak valid | Produk nonaktif dicoba dijual | Produk status `inactive` dipilih pada POS | Transaksi ditolak atau produk tidak dapat dijual |
+| EP-12 | Tidak valid | Produk nonaktif dicoba dijual | Produk status `inactive` dipilih pada POS | Produk tidak boleh diproses sebagai transaksi berhasil dan stok bahan tidak berubah |
 
 ## 8. Perhitungan Expected Result Stok
 
