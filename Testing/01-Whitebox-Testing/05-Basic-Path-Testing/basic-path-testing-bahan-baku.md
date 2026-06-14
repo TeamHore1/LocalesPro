@@ -206,26 +206,6 @@ Artinya minimal terdapat 11 jalur independen yang perlu diuji agar alur validasi
 
 Flow graph dapat digambar manual berdasarkan node N1 sampai N20. Node keputusan utama diberi bentuk belah ketupat, sedangkan proses biasa diberi bentuk persegi. Jalur error diarahkan ke node throw exception, sedangkan jalur valid diarahkan ke node selesai tanpa error.
 
-## 14. Panduan Screenshot Manual
-
-| No | Screenshot | Tujuan Bukti |
-| --- | --- | --- |
-| 1 | Kode fungsi `validateInventoryAvailabilityForCart()` | Bukti fungsi utama basic path |
-| 2 | Potongan kode predicate node | Bukti percabangan yang dihitung |
-| 3 | Diagram flow graph node N1-N20 | Bukti visual jalur eksekusi |
-| 4 | Tabel Cyclomatic Complexity | Bukti perhitungan V(G) |
-| 5 | Hasil uji jalur stok cukup / stok kurang | Bukti path berhasil dan gagal |
-
-Rekomendasi nama file:
-
-```text
-screenshot-basicpath-01-fungsi-validasi.png
-screenshot-basicpath-02-predicate-node.png
-screenshot-basicpath-03-flowgraph.png
-screenshot-basicpath-04-cyclomatic-complexity.png
-screenshot-basicpath-05-hasil-uji-path.png
-```
-
-## 15. Kesimpulan
+## 14. Kesimpulan
 
 Basic path testing pada fungsi `validateInventoryAvailabilityForCart()` menghasilkan Cyclomatic Complexity sebesar 11. Dengan demikian, minimal terdapat 11 jalur independen yang perlu diuji. Jalur tersebut mencakup cabang aktif tidak valid, item tidak valid, resep kosong, resep tidak valid, bahan beda cabang, stok kurang, stok cukup, akumulasi bahan sama, dan pengurangan stok setelah transaksi berhasil.

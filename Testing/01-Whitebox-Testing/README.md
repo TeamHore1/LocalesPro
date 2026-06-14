@@ -4,7 +4,7 @@
 
 Dokumen ini merupakan pengantar untuk paket white box testing fitur bahan baku pada aplikasi LocalesPro. Pengujian difokuskan pada source code yang mengatur hubungan antara produk, resep bahan baku, transaksi POS, pengurangan stok otomatis, pencatatan mutasi stok, dan void transaksi.
 
-White box testing dilakukan dengan melihat struktur internal kode program. Oleh karena itu, setiap dokumen metode menyertakan file kode yang diuji, potongan source code penting, analisis logika, serta panduan screenshot manual yang dapat ditambahkan sebagai bukti pengujian.
+White box testing dilakukan dengan melihat struktur internal kode program. Oleh karena itu, setiap dokumen metode menyertakan file kode yang diuji, potongan source code penting, dan analisis logika yang menjelaskan hubungan antara source code dengan fitur bahan baku.
 
 ## 2. Tujuan Dokumen
 
@@ -101,25 +101,8 @@ Resep produk:
 3. Jalur berhasil dan jalur gagal pada transaksi bahan baku dapat dijelaskan dari kode.
 4. Variabel penting seperti `qty`, `required`, `available`, `delta`, dan `stockAfter` dapat ditelusuri.
 5. Basic Path Testing memiliki node, predicate, Cyclomatic Complexity, dan independent path.
-6. Panduan screenshot tersedia untuk membantu penambahan bukti pengujian manual.
+6. Setiap metode memiliki struktur analisis yang dapat digunakan sebagai dasar dokumentasi hasil pengujian.
 
-## 11. Panduan Umum Screenshot
-
-Screenshot tidak dimasukkan langsung ke dokumen ini agar repository tetap rapi. Screenshot dapat ditambahkan manual ke folder metode masing-masing dengan nama file yang sesuai.
-
-Screenshot yang disarankan:
-
-| No | Screenshot | Lokasi Disarankan |
-| --- | --- | --- |
-| 1 | Potongan kode validasi resep produk | `01-Desk-Checking` atau `02-Code-Walkthrough` |
-| 2 | Potongan kode validasi transaksi POS | `02-Code-Walkthrough` atau `03-Control-Flow-Testing` |
-| 3 | Potongan kode validasi stok bahan | `03-Control-Flow-Testing` atau `05-Basic-Path-Testing` |
-| 4 | Potongan kode pengurangan stok | `04-Data-Flow-Testing` |
-| 5 | Flow graph basic path | `05-Basic-Path-Testing` |
-| 6 | Halaman POS transaksi berhasil | Folder metode yang membahas jalur berhasil |
-| 7 | Halaman stok setelah transaksi | Folder metode yang membahas perubahan stok |
-| 8 | Riwayat mutasi stok | Folder metode yang membahas mutasi stok |
-
-## 12. Kesimpulan
+## 11. Kesimpulan
 
 Paket white box testing ini dirancang agar sesuai dengan definisi white box testing, yaitu pengujian yang melihat isi kode dan struktur internal sistem. Dengan lima metode yang digunakan, pengujian tidak hanya membahas output aplikasi, tetapi juga logika kode, percabangan, aliran data, jalur independen, dan nilai variabel yang mempengaruhi stok bahan baku.

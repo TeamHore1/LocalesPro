@@ -152,26 +152,6 @@ Pada mode `deduct`, `$direction = -1`, sehingga stok berkurang. Pada mode `resto
 | Stok kurang | `required > available` | Stok bisa negatif jika dipaksa | Throw exception sebelum commit |
 | Mutasi tidak lengkap | Ingredient/branch/quantity invalid | Audit stok tidak tercatat | Guard clause pada `recordStockMovement()` |
 
-## 13. Panduan Screenshot Manual
-
-| No | Screenshot | Tujuan Bukti |
-| --- | --- | --- |
-| 1 | Kode pembentukan `$normalizedItems` | Bukti data POS dibersihkan sebelum diproses |
-| 2 | Kode perhitungan `$usageByIngredient` | Bukti resep dikalikan qty |
-| 3 | Kode validasi `$required > $available` | Bukti stok dicek sebelum transaksi berhasil |
-| 4 | Kode `$delta` dan `$stockAfter` | Bukti aliran data perubahan stok |
-| 5 | Screenshot halaman Stok setelah transaksi | Bukti output data flow |
-
-Rekomendasi nama file:
-
-```text
-screenshot-dataflow-01-normalized-items.png
-screenshot-dataflow-02-usage-by-ingredient.png
-screenshot-dataflow-03-validasi-required-available.png
-screenshot-dataflow-04-delta-stockafter.png
-screenshot-dataflow-05-output-stok.png
-```
-
-## 14. Kesimpulan
+## 13. Kesimpulan
 
 Data flow testing menunjukkan bahwa data transaksi mengalir dari input POS ke validasi produk, validasi stok, penyimpanan transaksi, pengurangan stok, dan pencatatan mutasi. Variabel utama seperti `$quantity`, `$required`, `$available`, `$delta`, dan `$stockAfter` menjadi titik penting yang harus benar agar stok bahan baku tetap akurat.

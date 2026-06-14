@@ -145,28 +145,6 @@ Resep produk:
 | Kebutuhan Sirup | 30 ml | Diisi saat eksekusi | Pass / Fail | Cocok jika `10 * 3` |
 | Stok akhir | 7, 700, 1470 | Diisi saat eksekusi | Pass / Fail | Cocok jika stok awal dikurangi kebutuhan |
 
-## 13. Panduan Screenshot Manual
-
-Tambahkan screenshot berikut secara manual ke folder GitHub jika dibutuhkan:
-
-| No | Screenshot | Tujuan Bukti |
-| --- | --- | --- |
-| 1 | Potongan kode `transactions/create.php` bagian validasi item dan pembayaran | Membuktikan desk checking memakai source code |
-| 2 | Potongan kode `validateInventoryAvailabilityForCart()` | Membuktikan perhitungan kebutuhan bahan dibaca dari kode |
-| 3 | Potongan kode `applyInventoryUsageForTransaction()` | Membuktikan stok berkurang melalui `delta` |
-| 4 | Halaman POS saat transaksi Kopisusu qty 3 berhasil | Bukti input transaksi |
-| 5 | Halaman Stok setelah transaksi | Bukti hasil pengurangan stok |
-
-Rekomendasi penamaan file screenshot:
-
-```text
-screenshot-desk-01-validasi-item.png
-screenshot-desk-02-validasi-stok.png
-screenshot-desk-03-pengurangan-stok.png
-screenshot-desk-04-pos-berhasil.png
-screenshot-desk-05-stok-akhir.png
-```
-
-## 14. Kesimpulan
+## 13. Kesimpulan
 
 Berdasarkan desk checking, alur kode transaksi bahan baku sudah menunjukkan hubungan yang jelas antara input transaksi, resep produk, validasi stok, dan pengurangan stok. Pada skenario valid, stok berkurang sesuai resep. Pada skenario gagal seperti item kosong, qty tidak valid, stok kurang, atau pembayaran kurang, transaksi dihentikan sebelum stok berubah.

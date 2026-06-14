@@ -167,25 +167,6 @@ Pengurangan stok dilakukan setelah transaksi dan item transaksi berhasil disimpa
 | 3 | Pengurangan stok bergantung pada data `transaction_items` | Jika item gagal tersimpan, stok tidak boleh diproses | Sudah dilindungi transaksi database |
 | 4 | Pencatatan mutasi stok silent return jika data tidak valid | Mutasi bisa tidak tercatat jika ingredient/branch/quantity invalid | Pastikan data mutasi lengkap sebelum pemanggilan |
 
-## 11. Panduan Screenshot Manual
-
-| No | Screenshot | Tujuan Bukti |
-| --- | --- | --- |
-| 1 | Kode `products/create.php` bagian validasi resep | Membuktikan produk wajib punya resep |
-| 2 | Kode `transactions/create.php` bagian validasi item, produk, cabang, pembayaran | Membuktikan walkthrough alur transaksi |
-| 3 | Kode `payment_helpers.php` bagian validasi stok | Membuktikan stok dicek sebelum transaksi selesai |
-| 4 | Kode `transactions/delete.php` bagian void | Membuktikan stok dapat dikembalikan saat transaksi void |
-| 5 | Halaman GitHub folder source code | Bukti file yang direview berasal dari repository aplikasi |
-
-Rekomendasi nama file:
-
-```text
-screenshot-walkthrough-01-validasi-resep.png
-screenshot-walkthrough-02-validasi-transaksi.png
-screenshot-walkthrough-03-validasi-stok.png
-screenshot-walkthrough-04-void-transaksi.png
-```
-
-## 12. Kesimpulan
+## 11. Kesimpulan
 
 Code walkthrough menunjukkan bahwa fitur bahan baku dikendalikan oleh backend melalui validasi resep, validasi transaksi, validasi stok, pengurangan stok, dan pencatatan mutasi. Kode utama sudah membentuk alur transaksi yang aman karena menggunakan validasi dan rollback. Beberapa risiko validasi tetap perlu dicatat sebagai bahan perbaikan, terutama validasi harga produk dan audit produk lama tanpa resep.

@@ -150,26 +150,6 @@ if ($required > $available) {
 3. Rollback terjadi ketika exception muncul di dalam transaksi database.
 4. Pengurangan stok hanya terjadi setelah transaksi dan item transaksi tersimpan.
 
-## 14. Panduan Screenshot Manual
-
-| No | Screenshot | Tujuan Bukti |
-| --- | --- | --- |
-| 1 | Potongan kode percabangan `items` kosong | Bukti node N2 |
-| 2 | Potongan kode loop item dan validasi produk | Bukti node N5-N9 |
-| 3 | Potongan kode validasi pembayaran | Bukti node N12 |
-| 4 | Potongan kode validasi stok | Bukti node N13 |
-| 5 | Diagram control flow yang dibuat manual | Bukti visual alur node dan edge |
-
-Rekomendasi nama file:
-
-```text
-screenshot-control-01-items-kosong.png
-screenshot-control-02-loop-produk.png
-screenshot-control-03-pembayaran.png
-screenshot-control-04-validasi-stok.png
-screenshot-control-05-flowgraph.png
-```
-
-## 15. Kesimpulan
+## 14. Kesimpulan
 
 Control flow testing menunjukkan bahwa transaksi POS memiliki jalur berhasil dan beberapa jalur gagal. Jalur gagal diarahkan ke exception dan rollback, sehingga stok bahan tidak berubah jika transaksi tidak valid. Jalur berhasil melewati validasi item, produk, cabang, pembayaran, stok, lalu menyimpan transaksi dan mengurangi stok bahan.
