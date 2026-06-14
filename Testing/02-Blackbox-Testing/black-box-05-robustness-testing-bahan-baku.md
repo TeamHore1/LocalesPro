@@ -77,8 +77,6 @@ Beberapa skenario robustness bersifat expected requirement. Jika implementasi sa
 
 Tabel berikut dipakai untuk mencatat respons aplikasi terhadap input tidak normal dan memastikan data stok tetap aman.
 
-Test case prioritas untuk waktu terbatas adalah `RB-10`, `RB-13`, `RB-17`, dan `RB-18` karena berkaitan langsung dengan risiko stok negatif, transaksi gagal, void ulang, dan transaksi ganda.
-
 | ID | Langkah Uji | Data Tidak Normal | Expected Result | Actual Result | Status | Bukti / Catatan |
 | --- | --- | --- | --- | --- | --- | --- |
 | RB-02 | Tambah bahan dengan stok negatif | Keju, stok -100, gr | Sistem menolak input atau dicatat sebagai temuan validasi jika diterima | Belum diuji | Not Run | Screenshot form / daftar bahan |

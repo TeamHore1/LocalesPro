@@ -126,37 +126,7 @@ Keterangan status:
 | Blocked | Test case belum dapat dijalankan karena data, akses, atau environment belum siap |
 | Not Run | Test case belum dijalankan |
 
-## 10. Prioritas Eksekusi Manual 1 Jam
-
-Jika waktu pengujian terbatas, tester disarankan menjalankan skenario yang paling mewakili alur bisnis utama terlebih dahulu. Skenario berikut dipilih karena langsung membuktikan apakah produk dengan resep bahan baku benar-benar mempengaruhi stok saat transaksi POS berhasil.
-
-| Prioritas | ID Terkait | Skenario | Halaman yang Dibuka | Bukti yang Perlu Diambil |
-| --- | --- | --- | --- | --- |
-| 1 | EP-03, BVA-02, DT-03 | Membuat produk Kopisusu dengan resep bahan baku valid | Menu & Resep | Screenshot produk dan detail resep |
-| 2 | EP-04, BVA-01 | Mencoba membuat produk tanpa resep | Menu & Resep | Screenshot pesan validasi resep wajib |
-| 3 | EP-06, DT-01, CE-01 | Menjual Kopisusu qty 3 dengan stok cukup dan uang cukup | POS | Screenshot transaksi berhasil atau struk |
-| 4 | EP-06, CE-01 | Memeriksa stok setelah transaksi berhasil | Stok | Screenshot stok Sedotan, Keju, dan Sirup setelah transaksi |
-| 5 | DT-01, CE-01 | Memeriksa riwayat mutasi stok penjualan | Stok / Mutasi Stok | Screenshot mutasi stok keluar karena penjualan |
-| 6 | EP-07, BVA-09, DT-05, CE-03 | Menjual produk melebihi stok bahan tersedia | POS | Screenshot pesan stok tidak cukup dan stok tetap |
-| 7 | EP-10, BVA-12, DT-07, CE-04 | Membayar tunai kurang dari total tagihan | POS | Screenshot pesan uang kurang dan stok tetap |
-| 8 | CE-07, BVA-16 | Melakukan void transaksi paid | Laporan Transaksi | Screenshot status void dan stok kembali |
-
-Skenario prioritas 1 sampai 5 sudah cukup untuk membuktikan alur utama berhasil. Skenario prioritas 6 sampai 8 digunakan untuk membuktikan bahwa sistem juga menangani kondisi gagal dan pembatalan transaksi.
-
-## 11. Contoh Pencatatan Actual Result
-
-Contoh berikut dapat digunakan sebagai pola saat mengisi hasil pengujian manual. Actual result harus disesuaikan dengan hasil yang benar-benar terlihat pada aplikasi.
-
-| ID Test Case | Expected Result | Contoh Actual Result Jika Berhasil | Status |
-| --- | --- | --- | --- |
-| EP-06 | Transaksi berhasil dan stok bahan berkurang sesuai resep | Transaksi Kopisusu qty 3 berhasil. Stok Sedotan berkurang dari 10 menjadi 7, Keju dari 1.000 menjadi 700, Sirup dari 1.500 menjadi 1.470. | Pass |
-| EP-07 | Transaksi ditolak dan stok tetap | Sistem menampilkan pesan stok tidak cukup. Transaksi tidak muncul sebagai paid dan stok Sedotan tetap 10 pcs. | Pass |
-| EP-10 | Pembayaran kurang ditolak dan stok tetap | Sistem menampilkan pesan uang tunai kurang dari total tagihan. Stok bahan tidak berubah. | Pass |
-| CE-07 | Void transaksi mengembalikan stok | Status transaksi berubah menjadi Voided dan stok bahan kembali sesuai jumlah yang sebelumnya terpakai. | Pass |
-
-Jika hasil aktual berbeda dari contoh di atas, status harus diisi `Fail` dan perbedaan tersebut dicatat sebagai temuan.
-
-## 12. Catatan Kesesuaian dengan Implementasi
+## 10. Catatan Kesesuaian dengan Implementasi
 
 Dokumen black box ini memuat expected behavior atau perilaku yang diharapkan dari sistem. Beberapa test case juga dapat berfungsi sebagai dasar menemukan kekurangan validasi pada implementasi saat ini. Jika saat pengujian ditemukan bahwa sistem masih menerima input yang seharusnya ditolak, maka hasil tersebut dicatat sebagai Fail dan dapat dijadikan bahan pembahasan pada pengujian white box atau rekomendasi perbaikan.
 
@@ -168,7 +138,7 @@ Contoh area yang perlu diperhatikan saat eksekusi pengujian:
 4. Validasi klik tombol pembayaran berulang.
 5. Validasi produk lama yang mungkin belum memiliki resep.
 
-## 13. Daftar Dokumen Pengujian
+## 11. Daftar Dokumen Pengujian
 
 | No | Dokumen | Metode |
 | --- | --- | --- |
@@ -178,7 +148,7 @@ Contoh area yang perlu diperhatikan saat eksekusi pengujian:
 | 4 | `black-box-04-cause-effect-relationship-testing-bahan-baku.md` | Cause-Effect Relationship Testing |
 | 5 | `black-box-05-robustness-testing-bahan-baku.md` | Robustness Testing |
 
-## 14. Kesimpulan
+## 12. Kesimpulan
 
 Pengujian black box fitur bahan baku LocalesPro dirancang untuk membuktikan bahwa proses penjualan produk memiliki dampak yang benar terhadap stok bahan baku. Dengan lima metode pengujian yang dipilih, dokumen ini tidak hanya menguji input valid dan tidak valid, tetapi juga nilai batas, kombinasi kondisi, hubungan sebab-akibat, dan ketahanan sistem terhadap input tidak normal.
 

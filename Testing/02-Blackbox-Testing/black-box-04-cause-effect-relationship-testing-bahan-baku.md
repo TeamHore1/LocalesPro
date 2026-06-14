@@ -77,8 +77,6 @@ Jika suatu cause menghasilkan effect yang tidak sesuai, misalnya transaksi gagal
 
 Tabel ini digunakan untuk membuktikan bahwa setiap cause menghasilkan effect yang tepat pada aplikasi.
 
-Test case prioritas untuk waktu terbatas adalah `CE-01`, `CE-03`, `CE-04`, dan `CE-07` karena membuktikan hubungan utama antara transaksi berhasil, stok kurang, pembayaran kurang, dan void transaksi terhadap perubahan stok.
-
 | ID | Cause | Langkah Uji | Expected Effect | Actual Effect | Status | Bukti / Catatan |
 | --- | --- | --- | --- | --- | --- | --- |
 | CE-01 | Produk aktif, resep valid, stok cukup, pembayaran cukup | Jual Kopisusu qty 3 dan bayar 50000 | Transaksi paid, stok berkurang, mutasi keluar tercatat | Belum diuji | Not Run | Screenshot laporan dan stok |

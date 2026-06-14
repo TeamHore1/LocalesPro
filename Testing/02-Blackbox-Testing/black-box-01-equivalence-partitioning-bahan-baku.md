@@ -77,8 +77,6 @@ Dokumen ini berisi expected behavior. Jika saat pengujian ditemukan sistem masih
 
 Tabel berikut digunakan saat pengujian benar-benar dijalankan. Kolom `Actual Result`, `Status`, dan `Bukti / Catatan` diisi setelah tester melakukan pengujian pada aplikasi.
 
-Test case prioritas untuk waktu terbatas adalah `EP-03`, `EP-04`, `EP-06`, `EP-07`, dan `EP-10` karena langsung membuktikan produk dengan resep dapat dibuat, transaksi valid mengurangi stok, dan transaksi tidak valid tidak mengubah stok.
-
 | ID | Langkah Uji | Data Uji | Expected Result | Actual Result | Status | Bukti / Catatan |
 | --- | --- | --- | --- | --- | --- | --- |
 | EP-01 | Login sebagai admin, buka Bahan Baku, tambah bahan valid | Keju, 1000 gr, min 100 | Bahan berhasil tersimpan | Belum diuji | Not Run | Screenshot daftar bahan |
